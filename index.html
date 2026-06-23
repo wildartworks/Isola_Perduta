@@ -285,6 +285,44 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 
   /* Cursor action label above dialog */
   #ca{bottom:62px}
+
+  /* ── INTRO PERGAMENA su mobile ── */
+  /* Schermo intro: occupa tutto e allineato in cima */
+  #intro-screen{
+    align-items:flex-start !important;
+    padding:12px !important;
+    overflow-y:auto;
+  }
+  /* Contenitore pergamena: lascia cadere l'aspect-ratio quadrata,
+     diventa un rettangolo verticale che usa l'altezza disponibile */
+  #intro-screen > div{
+    width:96vw !important;
+    aspect-ratio:unset !important;
+    min-height:min(90vh,580px);
+    padding:3.5rem 2.2rem 2rem !important; /* margini molto più stretti */
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+  }
+  /* Titolo più piccolo */
+  #intro-screen h2{
+    font-size:1.25rem !important;
+    margin-bottom:.3rem !important;
+    padding-bottom:.3rem !important;
+  }
+  /* Testo corpo: leggibile e scorrevole */
+  #intro-text{
+    font-size:.88rem !important;
+    line-height:1.55 !important;
+    margin:0 !important;
+  }
+  /* Pulsante più compatto */
+  #intro-screen .btn{
+    font-size:.9rem !important;
+    padding:.55em 1.6em !important;
+    margin-top:.5rem !important;
+  }
 }
   
   /* --- EDITOR UI --- */
