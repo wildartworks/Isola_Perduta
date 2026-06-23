@@ -179,15 +179,113 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 /* MOBILE */
 @media (max-width:768px) {
   #cv{width:100%!important}
-  #iv{width:100%;height:40vh;top:auto;bottom:0;border-left:none;border-top:4px solid #111;flex-direction:row;flex-wrap:wrap;overflow-y:auto;transform:translateY(100%)}
-  #iv:not(.hidden){transform:translateY(0)}
-  #iv-port{width:100%}
-  .iv-sec{flex:1;min-width:120px}
-  #db{bottom:42vh;width:95vw;padding:0.8rem}
-  .dp{display:none} /* Nascondi portrait per spazio */
-  .tbo{background:radial-gradient(ellipse at 50% 50%,#1f0e00,#000 80%)}
-  #mobile-ctrls, #mobile-action { display: flex !important; }
+
+  /* Inventory: collapsible bottom panel */
+  #iv{
+    width:100%;top:auto;bottom:0;border-left:none;
+    border-top:3px solid #c8a040;
+    flex-direction:column;
+    overflow:hidden;
+    height:52px; /* collapsed = just the toggle tab */
+    transition:height .35s cubic-bezier(.4,0,.2,1), transform .35s;
+    transform:translateY(0);
+    padding:0;
+    gap:0;
   }
+  #iv.hidden{transform:translateY(100%);pointer-events:none}
+  #iv.iv-open{height:220px}
+
+  /* Toggle tab inside inventory */
+  #iv-toggle-btn{
+    display:flex!important;
+    width:100%; height:52px;
+    align-items:center; justify-content:center;
+    gap:8px;
+    background:transparent;
+    border:none;
+    cursor:pointer;
+    font-family:var(--ft);
+    font-size:.78rem;
+    letter-spacing:.06em;
+    color:var(--gold);
+    flex-shrink:0;
+    pointer-events:auto;
+    user-select:none;
+  }
+  #iv-toggle-btn::before{
+    content:'🎒 ZAINO / PROVVISTE';
+  }
+  #iv.iv-open #iv-toggle-btn::before{
+    content:'▼ ZAINO / PROVVISTE';
+  }
+  #iv-toggle-btn::after{
+    content:'▲';
+    font-size:.7rem;
+  }
+  #iv.iv-open #iv-toggle-btn::after{
+    content:'▼';
+  }
+
+  /* Scrollable content inside expanded inventory */
+  #iv-inner-wrap{
+    display:flex;
+    flex-direction:row;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:8px 12px 12px;
+    overflow-y:auto;
+    flex:1;
+  }
+  .iv-sec{flex:1;min-width:110px;padding:6px}
+  #iv-port{width:auto;flex:1}
+  #iv-face{width:46px;height:50px;font-size:2.2rem}
+  #iv-name{font-size:.85rem}
+  .iv-title{font-size:.7rem;margin-bottom:3px}
+  #isl{grid-template-columns:repeat(5,1fr);gap:5px}
+  .is{aspect-ratio:1}
+  .ie{font-size:1.4rem}
+  .iv-slot{width:46px;height:46px}
+  .iv-hands{gap:8px;justify-content:center}
+
+  /* Dialog: sits above the collapsed tab */
+  #db{bottom:60px;width:95vw;padding:.6rem .8rem;font-size:.85rem}
+  #dtx{font-size:.82rem;line-height:1.5;min-height:1.8em}
+  #dsp{font-size:.82rem;margin-bottom:.25rem}
+  .dp{display:none}
+  .cb{font-size:.8rem;padding:.35em .7em}
+
+  /* HUD: scene name and status bars smaller */
+  #sn{font-size:.78rem;padding:.25em .8em;top:.5rem}
+  #status-bars-wrap{
+    top:.45rem;
+    padding:.3em .8em;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  #status-bars-wrap span{font-size:.6rem}
+  #status-bars-wrap > div > div:last-child{width:70px!important}
+  #ca{font-size:.8rem;bottom:62px}
+
+  /* Notification */
+  #nt{font-size:.8rem;padding:.45em 1em;white-space:normal;max-width:85vw;text-align:center}
+
+  /* Mobile D-pad smaller and repositioned */
+  #mobile-ctrls{
+    bottom:60px;
+    left:10px;
+  }
+  #mobile-action{
+    bottom:60px;
+    right:10px;
+  }
+  #mobile-ctrls, #mobile-action { display: flex !important; }
+
+  .tbo{background:radial-gradient(ellipse at 50% 50%,#1f0e00,#000 80%)}
+
+  /* Cursor action label above dialog */
+  #ca{bottom:62px}
+}
   
   /* --- EDITOR UI --- */
   #editor-ui {
@@ -342,18 +440,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
     </div>
   </div>
   <!-- CONTROLLI MOBILE D-PAD & ATTACCO (fuori dall'HUD status bars) -->
-  <div id="mobile-ctrls" style="position:fixed; bottom:calc(40vh + 15px); left:15px; z-index:99; display:none; flex-direction:column; align-items:center; user-select:none; pointer-events:auto;">
-    <div style="display:flex; justify-content:center; margin-bottom:5px;">
-      <button id="mbtn-up" style="width:52px; height:52px; background:rgba(0,0,0,0.7); border:2px solid #c8a040; border-radius:50%; color:#c8a040; font-size:1.3rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(200,160,64,0.3);">▲</button>
+  <div id="mobile-ctrls" style="position:fixed; bottom:60px; left:10px; z-index:99; display:none; flex-direction:column; align-items:center; user-select:none; pointer-events:auto;">
+    <div style="display:flex; justify-content:center; margin-bottom:4px;">
+      <button id="mbtn-up" style="width:42px; height:42px; background:rgba(0,0,0,0.72); border:2px solid #c8a040; border-radius:50%; color:#c8a040; font-size:1.05rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow:0 0 8px rgba(200,160,64,0.25);">▲</button>
     </div>
-    <div style="display:flex; gap:8px;">
-      <button id="mbtn-left" style="width:52px; height:52px; background:rgba(0,0,0,0.7); border:2px solid #c8a040; border-radius:50%; color:#c8a040; font-size:1.3rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(200,160,64,0.3);">◀</button>
-      <button id="mbtn-down" style="width:52px; height:52px; background:rgba(0,0,0,0.7); border:2px solid #c8a040; border-radius:50%; color:#c8a040; font-size:1.3rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(200,160,64,0.3);">▼</button>
-      <button id="mbtn-right" style="width:52px; height:52px; background:rgba(0,0,0,0.7); border:2px solid #c8a040; border-radius:50%; color:#c8a040; font-size:1.3rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(200,160,64,0.3);">▶</button>
+    <div style="display:flex; gap:6px;">
+      <button id="mbtn-left" style="width:42px; height:42px; background:rgba(0,0,0,0.72); border:2px solid #c8a040; border-radius:50%; color:#c8a040; font-size:1.05rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow:0 0 8px rgba(200,160,64,0.25);">◀</button>
+      <button id="mbtn-down" style="width:42px; height:42px; background:rgba(0,0,0,0.72); border:2px solid #c8a040; border-radius:50%; color:#c8a040; font-size:1.05rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow:0 0 8px rgba(200,160,64,0.25);">▼</button>
+      <button id="mbtn-right" style="width:42px; height:42px; background:rgba(0,0,0,0.72); border:2px solid #c8a040; border-radius:50%; color:#c8a040; font-size:1.05rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow:0 0 8px rgba(200,160,64,0.25);">▶</button>
     </div>
   </div>
-  <div id="mobile-action" style="position:fixed; bottom:calc(40vh + 15px); right:15px; z-index:99; display:none; user-select:none; pointer-events:auto;">
-    <button id="mbtn-attack" style="width:58px; height:58px; background:linear-gradient(135deg,#e74c3c,#c0392b); border:2px solid #fff; border-radius:50%; color:white; font-size:1.2rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 12px rgba(231,76,60,0.5);">💥</button>
+  <div id="mobile-action" style="position:fixed; bottom:60px; right:10px; z-index:99; display:none; user-select:none; pointer-events:auto;">
+    <button id="mbtn-attack" style="width:48px; height:48px; background:linear-gradient(135deg,#e74c3c,#c0392b); border:2px solid #fff; border-radius:50%; color:white; font-size:1rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow: 0 3px 10px rgba(231,76,60,0.45);">💥</button>
   </div>
   <!-- DIALOG -->
   <div id="db" class="hidden">
@@ -366,26 +464,31 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   </div>
   <!-- INVENTORY -->
   <div id="iv" class="hidden">
-    <div class="iv-sec" id="iv-port">
-      <div id="iv-face" style="font-size:2.5rem">&#x1F575;&#xFE0F;</div>
-      <div style="flex:1">
-        <div id="iv-name" style="font-size:1.1rem">Scegli<br>un personaggio</div>
-        <div style="width:100%;height:6px;background:#0a1520;border:1px solid #1a3a5a;margin-top:6px;border-radius:3px">
-          <div id="memory-fill" style="width:100%;height:100%;background:linear-gradient(90deg,#1a6aaa,#4acce0);border-radius:3px;transition:width 0.5s"></div>
+    <!-- Mobile toggle tab (hidden on desktop via CSS) -->
+    <button id="iv-toggle-btn" style="display:none;" onclick="toggleMobileInventory()" aria-label="Apri/chiudi zaino"></button>
+    <!-- Main content wrapper -->
+    <div id="iv-inner-wrap">
+      <div class="iv-sec" id="iv-port">
+        <div id="iv-face" style="font-size:2.5rem">&#x1F575;&#xFE0F;</div>
+        <div style="flex:1">
+          <div id="iv-name" style="font-size:1.1rem">Scegli<br>un personaggio</div>
+          <div style="width:100%;height:6px;background:#0a1520;border:1px solid #1a3a5a;margin-top:6px;border-radius:3px">
+            <div id="memory-fill" style="width:100%;height:100%;background:linear-gradient(90deg,#1a6aaa,#4acce0);border-radius:3px;transition:width 0.5s"></div>
+          </div>
+          <div style="font-size:.6rem;color:#4a7a9a;margin-top:2px">MEMORIA</div>
         </div>
-        <div style="font-size:.6rem;color:#4a7a9a;margin-top:2px">MEMORIA</div>
       </div>
-    </div>
-    <div class="iv-sec">
-      <div class="iv-title">Equipaggiamento</div>
-      <div class="iv-hands">
-        <div class="iv-slot" id="iv-hand-l" data-label="Mano Sx"></div>
-        <div class="iv-slot" id="iv-hand-r" data-label="Mano Dx"></div>
+      <div class="iv-sec">
+        <div class="iv-title">Equipaggiamento</div>
+        <div class="iv-hands">
+          <div class="iv-slot" id="iv-hand-l" data-label="Mano Sx"></div>
+          <div class="iv-slot" id="iv-hand-r" data-label="Mano Dx"></div>
+        </div>
       </div>
-    </div>
-    <div class="iv-sec" style="flex:1">
-      <div class="iv-title">Zaino / Provviste</div>
-      <div id="isl"></div>
+      <div class="iv-sec" style="flex:1">
+        <div class="iv-title">Zaino / Provviste</div>
+        <div id="isl"></div>
+      </div>
     </div>
   </div>
   <!-- NOTIFICATION -->
@@ -2802,6 +2905,37 @@ function bootstrap() {
   bind('mb', (e) => { if(game) { const m = game.audio.toggle(); e.target.textContent = m ? '🔇' : '🔊'; } });
   bind('restart-btn', () => location.reload());
 }
+
+// Mobile inventory toggle
+window.toggleMobileInventory = () => {
+  const iv = document.getElementById('iv');
+  if (!iv) return;
+  iv.classList.toggle('iv-open');
+  // Reposition D-pad when inventory is open/closed
+  const isOpen = iv.classList.contains('iv-open');
+  const ctrls = document.getElementById('mobile-ctrls');
+  const action = document.getElementById('mobile-action');
+  const bottom = isOpen ? '228px' : '60px';
+  if (ctrls) ctrls.style.bottom = bottom;
+  if (action) action.style.bottom = bottom;
+};
+
+// On mobile, ensure inventory starts collapsed (not hidden)
+(function initMobileUI() {
+  const isMobile = window.innerWidth <= 768;
+  if (!isMobile) return;
+  // Listen for when inventory becomes visible (unhidden by game code)
+  // and make sure the inner wrap is scrollable
+  const observer = new MutationObserver(() => {
+    const iv = document.getElementById('iv');
+    if (!iv) return;
+    if (!iv.classList.contains('hidden') && !iv.classList.contains('iv-open')) {
+      // newly shown: stays collapsed (tab only), user must tap to expand
+    }
+  });
+  const iv = document.getElementById('iv');
+  if (iv) observer.observe(iv, { attributes: true, attributeFilter: ['class'] });
+})();
 
 bootstrap();
 
