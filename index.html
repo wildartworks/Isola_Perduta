@@ -1,0 +1,2810 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Isola Senza Nome — Un'avventura sull'isola perduta</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230a1820'/%3E%3Ccircle cx='32' cy='26' r='14' fill='%23c8a040'/%3E%3Ccircle cx='26' cy='23' r='3' fill='%230a1820'/%3E%3Ccircle cx='38' cy='23' r='3' fill='%230a1820'/%3E%3Cpath d='M26 34 Q32 38 38 34' stroke='%230a1820' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Crect x='24' y='37' width='5' height='5' rx='1' fill='%23c8a040'/%3E%3Crect x='31' y='37' width='5' height='5' rx='1' fill='%23c8a040'/%3E%3Cpath d='M20 48 Q32 44 44 48 L42 56 Q32 52 22 56 Z' fill='%23c8a040'/%3E%3C/svg%3E"/>
+<meta name="description" content="Un'avventura punta-e-clicca ironica e misteriosa. L'isola cancella i ricordi. E anche tu dimenticherai."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#c8a040;--gold-d:#7a5c10;--petrol:#0d2535;--rot:#0a1820;
+  --parch:#d8cbb0;--dark:#060c10;--r:10px;
+  --ft:'Cinzel Decorative',cursive;--fb:'IM Fell English',serif;
+  --fog:#1a3040;--accent:#1a4a6a;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var(--fb);color:var(--parch);user-select:none}
+#gc{position:relative;width:100vw;height:100vh;overflow:hidden}
+#cv{display:block;position:absolute;top:0;left:0;width:calc(100% - 320px);height:100%;cursor:default}
+.hidden{display:none!important}
+#fo{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .35s;z-index:80}
+/* LOADING */
+#ls{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#1a0c00,#000);z-index:200}
+.lc{text-align:center}
+.lsk{font-size:4rem;animation:float 2s ease-in-out infinite}
+.lt{font-family:var(--ft);font-size:clamp(2.5rem,8vw,5rem);color:var(--gold);text-shadow:0 0 30px rgba(240,192,64,.6);letter-spacing:.1em;margin:.3em 0 .1em}
+.ls2{font-size:1.1rem;color:#c8a060;font-style:italic;margin-bottom:2rem}
+.lbw{display:flex;flex-direction:column;align-items:center;gap:.6rem}
+.lb{width:280px;height:14px;border:2px solid var(--gold-d);border-radius:7px;background:rgba(0,0,0,.5);overflow:hidden}
+.lf{height:100%;width:0%;background:linear-gradient(90deg,var(--gold-d),var(--gold));transition:width .1s linear;border-radius:7px}
+.ll{font-size:.85rem;color:#998866}
+/* TITLE */
+#ts{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:150}
+.tbo{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,#0d2535 0%,#060c10 70%);}
+.tbo::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231a4a6a' fill-opacity='0.08'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");animation:bgScroll 20s linear infinite;}
+@keyframes bgScroll{from{background-position:0 0}to{background-position:60px 60px}}
+.tc{position:relative;text-align:center;padding:2rem;max-width:640px;animation:fadeInUp 1s ease both}
+.tsk{font-size:3.5rem;margin-bottom:.5rem;animation:float 3s ease-in-out infinite}
+.tm{font-family:var(--ft);font-size:clamp(3rem,10vw,6rem);color:var(--gold);text-shadow:0 0 40px rgba(240,192,64,.7),0 4px 8px rgba(0,0,0,.8);letter-spacing:.08em;line-height:1}
+.ts2{font-size:clamp(1rem,3vw,1.5rem);color:#d4a060;font-style:italic;margin:.4em 0 1.2em}
+.td{font-size:.9rem;color:#a08060;line-height:1.7;margin-bottom:1.5rem}
+.btn{font-family:var(--ft);font-size:1.3rem;letter-spacing:.06em;padding:.8em 2.2em;background:linear-gradient(135deg,var(--gold-d),var(--gold));color:var(--dark);border:none;border-radius:50px;cursor:pointer;box-shadow:0 0 24px rgba(240,192,64,.5),0 4px 12px rgba(0,0,0,.5);transition:transform .2s,box-shadow .2s;margin:.4rem}
+.btn:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 0 36px rgba(240,192,64,.75),0 8px 20px rgba(0,0,0,.5)}
+.btn:active{transform:translateY(0) scale(.98)}
+.tcr{margin-top:1.5rem;font-size:.75rem;color:#445566}
+/* CHARACTER SELECT */
+#char-select{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:160;background:radial-gradient(ellipse at center,#0a1e2e,#030810)}
+.cs-title{font-family:var(--ft);font-size:clamp(1.2rem,4vw,2rem);color:var(--gold);text-align:center;margin-bottom:.3em;letter-spacing:.1em}
+.cs-sub{font-size:.9rem;color:#6a8a9a;font-style:italic;margin-bottom:2.5rem;text-align:center}
+.cs-cards{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap}
+.cs-card{width:220px;padding:1.8rem 1.4rem;background:rgba(10,30,45,.7);border:2px solid #1a3a5a;border-radius:12px;cursor:pointer;text-align:center;transition:border-color .3s,transform .3s,box-shadow .3s;position:relative;overflow:hidden}
+.cs-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(30,100,150,.1),transparent);opacity:0;transition:opacity .3s}
+.cs-card:hover,.cs-card.selected{border-color:var(--gold);transform:translateY(-6px);box-shadow:0 0 30px rgba(200,160,64,.3);}
+.cs-card:hover::before,.cs-card.selected::before{opacity:1}
+.cs-card .cs-emoji{font-size:4rem;margin-bottom:.6rem;display:block}
+.cs-card .cs-name{font-family:var(--ft);font-size:1.1rem;color:var(--gold);margin-bottom:.4rem}
+.cs-card .cs-desc{font-size:.8rem;color:#7a9aaa;line-height:1.5;font-style:italic}
+.cs-start{font-family:var(--ft);font-size:1.2rem;padding:.7em 2.5em;background:linear-gradient(135deg,#1a4a6a,#2a7aaa);color:#d8e8f0;border:2px solid #3a8aaa;border-radius:50px;cursor:pointer;margin-top:2rem;transition:transform .2s,box-shadow .2s;box-shadow:0 0 20px rgba(50,150,200,.3)}
+.cs-start:hover{transform:translateY(-3px);box-shadow:0 0 30px rgba(50,150,200,.5)}
+.lang-row{margin-bottom:1rem;display:flex;gap:.5rem;justify-content:center}
+.lang-btn{font-family:var(--ft);font-size:.95rem;padding:.4em 1.2em;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.35);color:var(--gold);border-radius:30px;cursor:pointer;transition:background .2s,border-color .2s}
+.lang-btn.active,.lang-btn:hover{background:rgba(240,192,64,.25);border-color:var(--gold)}
+/* HUD */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:50}
+#sn{position:absolute;top:1rem;left:50%;transform:translateX(-50%);font-family:var(--ft);font-size:1.05rem;color:var(--gold);background:rgba(0,0,0,.55);padding:.35em 1.2em;border-radius:30px;border:1px solid rgba(240,192,64,.3);backdrop-filter:blur(4px);text-shadow:0 0 10px rgba(240,192,64,.5);letter-spacing:.05em}
+#ca{position:absolute;bottom:130px;left:50%;transform:translateX(-50%);font-family:var(--fb);font-size:1rem;color:#fffbe6;background:rgba(10,5,0,.8);border:1px solid rgba(240,192,64,.4);padding:.4em 1.2em;border-radius:6px;opacity:0;transition:opacity .2s;white-space:nowrap;pointer-events:none}
+/* DIALOG */
+#db{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);width:min(680px,92vw);background:linear-gradient(160deg,#1a0e04,#0d0602);border:2px solid var(--gold-d);border-radius:var(--r);box-shadow:0 0 30px rgba(240,192,64,.25),0 10px 40px rgba(0,0,0,.8);display:flex;align-items:flex-start;gap:1rem;padding:1rem 1.2rem;z-index:90;animation:slideUp .3s ease}
+.dp{font-size:2rem;flex-shrink:0;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);border-radius:50%}
+.di{flex:1}
+#dsp{font-family:var(--ft);font-size:1rem;color:var(--gold);margin-bottom:.4rem;letter-spacing:.05em}
+#dtx{font-size:.97rem;line-height:1.6;color:var(--parch);min-height:2.5em}
+#dch{display:flex;flex-direction:column;gap:.4rem;margin-top:.8rem}
+.cb{font-family:var(--fb);font-size:.93rem;text-align:left;padding:.45em 1em;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.3);border-radius:6px;color:#ffe0a0;cursor:pointer;transition:background .18s,border-color .18s,transform .1s}
+.cb:hover{background:rgba(240,192,64,.2);border-color:var(--gold);transform:translateX(4px)}
+/* INVENTORY EOB2 STYLE */
+#iv{position:fixed;top:0;right:0;bottom:0;width:320px;background:#2a2a2a;border-left:4px solid #111;display:flex;flex-direction:column;z-index:60;box-shadow:inset 0 0 20px #000;background-image:linear-gradient(45deg,#333 25%,transparent 25%,transparent 75%,#333 75%,#333),linear-gradient(45deg,#333 25%,transparent 25%,transparent 75%,#333 75%,#333);background-size:20px 20px;background-position:0 0,10px 10px;padding:15px;gap:15px;user-select:none;transition:transform .4s}
+#iv.hidden{transform:translateX(100%);pointer-events:none}
+.iv-sec{background:#111;border:2px solid #555;border-top-color:#777;border-left-color:#777;border-bottom-color:#000;border-right-color:#000;padding:10px;box-shadow:inset 0 0 10px #000;display:flex;flex-direction:column;gap:10px}
+.iv-title{font-family:var(--ft);color:#aaa;text-transform:uppercase;font-size:.9rem;letter-spacing:1px;text-align:center;text-shadow:1px 1px 0 #000;margin-bottom:5px}
+/* PORTRAIT */
+#iv-port{display:flex;flex-direction:row;gap:15px;align-items:center}
+#iv-face{width:70px;height:80px;background:#222;border:2px solid #555;border-top-color:#000;border-left-color:#000;border-bottom-color:#777;border-right-color:#777;display:flex;align-items:center;justify-content:center;font-size:3.5rem}
+#iv-name{font-family:var(--ft);color:var(--gold);font-size:1.6rem;text-shadow:2px 2px 0 #000;line-height:1.2}
+/* HANDS */
+.iv-hands{display:flex;justify-content:space-around}
+.iv-slot{width:64px;height:64px;background:#222;border:2px solid #555;border-top-color:#000;border-left-color:#000;border-bottom-color:#777;border-right-color:#777;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.iv-slot::after{content:attr(data-label);position:absolute;bottom:-18px;font-family:var(--fb);font-size:.75rem;color:#888;white-space:nowrap}
+.iv-slot.sel{border-color:var(--gold);box-shadow:0 0 10px var(--gold-d)}
+/* BACKPACK */
+#isl{display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;padding-bottom:15px}
+.is{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;aspect-ratio:1;background:#222;border:2px solid #555;border-top-color:#000;border-left-color:#000;border-bottom-color:#777;border-right-color:#777;cursor:pointer;transition:border-color .2s}
+.is:hover{border-color:var(--gold)}
+.ie{font-size:2rem;line-height:1}
+.in{font-size:.6rem;color:#aaa;text-align:center;line-height:1;margin-top:4px;display:none}
+/* NOTIFICATION */
+#nt{position:fixed;top:4.5rem;left:50%;transform:translateX(-50%) translateY(-10px);background:rgba(0,0,0,.85);border:1.5px solid var(--gold-d);border-radius:8px;padding:.65em 1.5em;font-size:1rem;color:var(--parch);z-index:100;opacity:0;transition:opacity .4s,transform .4s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.7)}
+#nt.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* MAP OVERLAY */
+#map-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 15, 20, 0.9);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease;
+}
+#map-overlay.hidden {
+  display: none !important;
+}
+.map-container {
+  position: relative;
+  max-width: 85vw;
+  max-height: 85vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 4px solid var(--gold);
+  border-radius: 12px;
+  box-shadow: 0 0 50px rgba(240, 192, 64, 0.4), 0 20px 50px rgba(0,0,0,0.9);
+  background: #000;
+  overflow: hidden;
+  animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#map-img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  display: block;
+}
+#close-map-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  background: rgba(192, 57, 43, 0.9);
+  border: 2px solid var(--gold);
+  color: white;
+  font-size: 1.4rem;
+  font-family: monospace;
+  font-weight: bold;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  transition: background 0.2s, transform 0.2s;
+  z-index: 310;
+}
+#close-map-btn:hover {
+  background: rgba(231, 76, 60, 1);
+  transform: scale(1.1);
+}
+/* WIN */
+#ws{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:200;animation:fadeIn .6s ease}
+.wbo{position:absolute;inset:0;background:radial-gradient(ellipse at center,#1a1000,#000)}
+.wc{position:relative;text-align:center;padding:3rem 2rem;max-width:580px;animation:scaleIn .7s cubic-bezier(.34,1.56,.64,1) both}
+.wi{font-size:5rem;animation:float 2s ease-in-out infinite;margin-bottom:.5rem}
+.wt{font-family:var(--ft);font-size:clamp(2.5rem,8vw,4.5rem);color:var(--gold);text-shadow:0 0 40px rgba(240,192,64,.7);margin-bottom:.6rem}
+.wtx{font-size:1.05rem;color:#c8a060;line-height:1.7;margin-bottom:1.5rem}
+.wco{font-size:2rem;margin-bottom:2rem;animation:float 1.5s ease-in-out infinite}
+/* MUTE */
+#mb{position:fixed;top:1rem;right:1rem;z-index:70;font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s}
+#mb:hover{background:rgba(240,192,64,.15)}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+#isl::-webkit-scrollbar{height:4px}
+#isl::-webkit-scrollbar-thumb{background:rgba(240,192,64,.3);border-radius:2px}
+/* MOBILE */
+@media (max-width:768px) {
+  #cv{width:100%!important}
+  #iv{width:100%;height:40vh;top:auto;bottom:0;border-left:none;border-top:4px solid #111;flex-direction:row;flex-wrap:wrap;overflow-y:auto;transform:translateY(100%)}
+  #iv:not(.hidden){transform:translateY(0)}
+  #iv-port{width:100%}
+  .iv-sec{flex:1;min-width:120px}
+  #db{bottom:42vh;width:95vw;padding:0.8rem}
+  .dp{display:none} /* Nascondi portrait per spazio */
+  .tbo{background:radial-gradient(ellipse at 50% 50%,#1f0e00,#000 80%)}
+  #mobile-ctrls, #mobile-action { display: flex !important; }
+  }
+  
+  /* --- EDITOR UI --- */
+  #editor-ui {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 100;
+    display: flex; flex-direction: column; justify-content: space-between;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  #editor-ui.hidden { display: none; }
+  .editor-panel {
+    background: rgba(20, 20, 25, 0.9);
+    border: 1px solid #445;
+    color: #ddd;
+    pointer-events: auto;
+    backdrop-filter: blur(5px);
+  }
+  #editor-topbar {
+    width: 100%; height: 50px;
+    display: flex; justify-content: center; align-items: center; gap: 15px;
+    border-bottom: 1px solid #445;
+  }
+  #editor-topbar button {
+    background: #334; border: 1px solid #556; color: #fff;
+    padding: 8px 16px; border-radius: 4px; cursor: pointer;
+    font-weight: bold; transition: background 0.2s;
+  }
+  #editor-topbar button:hover { background: #445; }
+  #editor-topbar button.active { background: #d35400; border-color: #e67e22; }
+  
+  .editor-main {
+    display: flex; justify-content: space-between; flex: 1;
+    overflow: hidden;
+  }
+  
+  #editor-left {
+    width: 250px; height: 100%; overflow-y: auto;
+    border-right: 1px solid #445;
+  }
+  .editor-header {
+    background: #111; padding: 10px; font-weight: bold;
+    border-bottom: 1px solid #445; text-align: center;
+  }
+  #editor-obj-list { list-style: none; padding: 0; margin: 0; }
+  #editor-obj-list li {
+    padding: 8px 10px; border-bottom: 1px solid #334; cursor: pointer;
+    font-size: 0.9rem; transition: background 0.2s;
+  }
+  #editor-obj-list li:hover { background: #334; }
+  #editor-obj-list li.selected { background: #d35400; color: white; }
+  
+  #editor-right {
+    width: 250px; height: 100%; overflow-y: auto;
+    border-left: 1px solid #445;
+  }
+  .prop-group { padding: 10px; border-bottom: 1px solid #334; }
+  .prop-group label { display: block; font-size: 0.8rem; margin-bottom: 5px; color: #aaa; }
+  .prop-row { display: flex; align-items: center; margin-bottom: 5px; gap: 5px; }
+  .prop-row span { display: inline-block; width: 15px; color: #888; font-size: 0.8rem; }
+  .prop-row input {
+    flex: 1; background: #111; border: 1px solid #555; color: #fff;
+    padding: 4px; font-family: monospace; border-radius: 3px;
+  }
+  .prop-row input:focus { outline: none; border-color: #d35400; }
+</style>
+</head>
+<body>
+<div id="gc">
+  <canvas id="cv"></canvas>
+  <div id="fo"></div>
+  <!-- LOADING -->
+  <div id="ls">
+    <div class="lc">
+      <div class="lsk">🌊</div>
+      <h1 class="lt">ISLA PERDIDA</h1>
+      <p class="ls2">Un'isola che dimentica. E anche tu dimenticherai.</p>
+      <div class="lbw"><div class="lb"><div class="lf" id="lf"></div></div><span class="ll" id="ll">Caricamento...</span></div>
+    </div>
+  </div>
+  <!-- TITLE -->
+  <div id="ts" class="hidden">
+    <div class="tbo"></div>
+    <div class="tc">
+      <img id="title-img" src="assets/Title.png" alt="Isola Perdida Title" style="max-width:80%;height:auto;margin-bottom:1rem;">
+      <div class="tsk" style="font-size:1.8rem;letter-spacing:0.3em;color:#4a7a9a;margin-bottom:.8rem">&#x2666; &#x2605; &#x2666;</div>
+      <h1 class="tm">ISLA PERDIDA</h1>
+      <h2 class="ts2">Un'isola che dimentica.<br><em style="font-size:.85em;color:#6a8a9a">E anche tu dimenticherai.</em></h2>
+      <p class="td">Una storia di memoria perduta, tecnologia antica<br>e fenicotteri inquietanti.</p>
+      <button class="btn" id="start-btn" onclick="showCharSelect()">&#x2726; INIZIA L'AVVENTURA &#x2726;</button>
+      <div class="tcr">Three.js &middot; Mystery Adventure &middot; Punta e Clicca</div>
+    </div>
+  </div>
+  <!-- CHARACTER SELECT -->
+  <div id="char-select" class="hidden">
+    <div class="cs-title">CHI SEI?</div>
+    <div class="cs-sub">La tua identit&agrave; &egrave; la prima cosa che l'isola prover&agrave; a cancellare.</div>
+    <div class="cs-cards">
+      <div class="cs-card" id="card-elias" onclick="selectChar('elias')">
+        <img class="cs-avatar" src="assets/Foto_Elias.jpg" alt="Elias Crow" style="width:48px;height:48px;object-fit:cover;border-radius:50%;margin-bottom:0.5rem;"/>
+        <div class="cs-name">Elias Crow</div>
+        <div class="cs-desc">&ldquo;Un audace pirata avventuriero alla ricerca di risposte<br>e leggendari tesori perduti.&rdquo;</div>
+      </div>
+      <div class="cs-card" id="card-valentine" onclick="selectChar('valentine')">
+          <img class="cs-avatar" src="assets/Foto_Valentine.jpg" alt="Valentine Black" style="width:48px;height:48px;object-fit:cover;border-radius:50%;margin-bottom:0.5rem;"/>
+          <div class="cs-name">Valentine Black</div>
+          <div class="cs-desc">&ldquo;Una coraggiosa pirata esploratrice guidata<br/>da una misteriosa mappa stellare.&rdquo;</div>
+        </div>
+    </div>
+    <button class="cs-start hidden" id="cs-start-btn" onclick="startGame()">PARTI PER L'ISOLA &#x2192;</button>
+  </div>
+  
+  <!-- MENU PRINCIPALE GIOCO (con sfondo Menu_01.png ed hotspot interattivi) -->
+  <div id="game-menu" class="hidden" style="position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:165; background: linear-gradient(rgba(10, 30, 46, 0.45), rgba(3, 8, 16, 0.75)), url('assets/Title.png?v=2') no-repeat center center; background-size: cover;">
+    <div style="position:relative; width:min(90vw, 420px); aspect-ratio: 3/4; background: url('assets/Menu_01.png?v=2') no-repeat center center; background-size: contain; border-radius: 15px; overflow:hidden;">
+      
+      <!-- NEW GAME option overlay -->
+      <div class="menu-hotspot" onclick="menuNewGame()" style="position:absolute; left:4%; top:21%; width:92%; height:14%; cursor:pointer; border-radius:10px; transition: background 0.3s; box-shadow: inset 0 0 0px rgba(240,192,64,0);" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.boxShadow='inset 0 0 10px rgba(240,192,64,0.3)';" onmouseout="this.style.background='none'; this.style.boxShadow='none';"></div>
+      
+      <!-- QUEST MAP option overlay -->
+      <div class="menu-hotspot" onclick="menuQuestMap()" style="position:absolute; left:4%; top:39%; width:92%; height:14%; cursor:pointer; border-radius:10px; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.boxShadow='inset 0 0 10px rgba(240,192,64,0.3)';" onmouseout="this.style.background='none'; this.style.boxShadow='none';"></div>
+      
+      <!-- INVENTORY option overlay -->
+      <div class="menu-hotspot" onclick="menuInventory()" style="position:absolute; left:4%; top:57%; width:92%; height:14%; cursor:pointer; border-radius:10px; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.boxShadow='inset 0 0 10px rgba(240,192,64,0.3)';" onmouseout="this.style.background='none'; this.style.boxShadow='none';"></div>
+      
+      <!-- EXIT option overlay -->
+      <div class="menu-hotspot" onclick="menuExit()" style="position:absolute; left:4%; top:75%; width:92%; height:14%; cursor:pointer; border-radius:10px; transition: background 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.boxShadow='inset 0 0 10px rgba(240,192,64,0.3)';" onmouseout="this.style.background='none'; this.style.boxShadow='none';"></div>
+
+    </div>
+    
+    <!-- Pulsante per tornare alla selezione del personaggio -->
+    <button class="btn" onclick="menuBackToChars()" style="margin-top:20px; font-size:1.1rem; padding: 0.5em 1.8em; background: linear-gradient(135deg, #2c3e50, #34495e); border: 2px solid #555; border-radius:30px;">&#x2190; CAMBIA PERSONAGGIO</button>
+  </div>
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="sn"></div>
+    <div id="ca"></div>
+    <div id="debug-panel" style="position:fixed;top:60px;left:10px;background:rgba(0,0,0,0.8);color:lime;font-family:monospace;padding:10px;font-size:12px;z-index:9999;pointer-events:none;">Debug...</div>
+    <div id="status-bars-wrap" style="position:absolute;top:1rem;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:20px;background:rgba(0,0,0,.65);padding:.4em 1.2em;border-radius:20px;border:1px solid rgba(100,160,200,.3);backdrop-filter:blur(4px)">
+      <!-- MEMORIA -->
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:0.75rem;color:#6a9ab0;font-family:var(--fb)">MEMORIA</span>
+        <div style="width:100px;height:8px;background:#0a1520;border-radius:4px;border:1px solid #1a3a5a">
+          <div id="memory-bar" style="width:100%;height:100%;background:linear-gradient(90deg,#1a6aaa,#4acce0);border-radius:4px;transition:width 0.5s"></div>
+        </div>
+      </div>
+      <!-- SALUTE -->
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:0.75rem;color:#e74c3c;font-family:var(--fb)">SALUTE</span>
+        <div style="width:100px;height:8px;background:#200505;border-radius:4px;border:1px solid #5a1a1a">
+          <div id="health-bar" style="width:100%;height:100%;background:linear-gradient(90deg,#c0392b,#e74c3c);border-radius:4px;transition:width 0.5s"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- CONTROLLI MOBILE D-PAD & ATTACCO (fuori dall'HUD status bars) -->
+  <div id="mobile-ctrls" style="position:fixed; bottom:calc(40vh + 15px); left:15px; z-index:99; display:none; flex-direction:column; align-items:center; user-select:none; pointer-events:auto;">
+    <div style="display:flex; justify-content:center; margin-bottom:5px;">
+      <button id="mbtn-up" style="width:52px; height:52px; background:rgba(0,0,0,0.7); border:2px solid #c8a040; border-radius:50%; color:#c8a040; font-size:1.3rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(200,160,64,0.3);">▲</button>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button id="mbtn-left" style="width:52px; height:52px; background:rgba(0,0,0,0.7); border:2px solid #c8a040; border-radius:50%; color:#c8a040; font-size:1.3rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(200,160,64,0.3);">◀</button>
+      <button id="mbtn-down" style="width:52px; height:52px; background:rgba(0,0,0,0.7); border:2px solid #c8a040; border-radius:50%; color:#c8a040; font-size:1.3rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(200,160,64,0.3);">▼</button>
+      <button id="mbtn-right" style="width:52px; height:52px; background:rgba(0,0,0,0.7); border:2px solid #c8a040; border-radius:50%; color:#c8a040; font-size:1.3rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(200,160,64,0.3);">▶</button>
+    </div>
+  </div>
+  <div id="mobile-action" style="position:fixed; bottom:calc(40vh + 15px); right:15px; z-index:99; display:none; user-select:none; pointer-events:auto;">
+    <button id="mbtn-attack" style="width:58px; height:58px; background:linear-gradient(135deg,#e74c3c,#c0392b); border:2px solid #fff; border-radius:50%; color:white; font-size:1.2rem; font-weight:bold; touch-action:none; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 12px rgba(231,76,60,0.5);">💥</button>
+  </div>
+  <!-- DIALOG -->
+  <div id="db" class="hidden">
+    <div class="dp" id="dpo">🧔</div>
+    <div class="di">
+      <div id="dsp"></div>
+      <div id="dtx"></div>
+      <div id="dch"></div>
+    </div>
+  </div>
+  <!-- INVENTORY -->
+  <div id="iv" class="hidden">
+    <div class="iv-sec" id="iv-port">
+      <div id="iv-face" style="font-size:2.5rem">&#x1F575;&#xFE0F;</div>
+      <div style="flex:1">
+        <div id="iv-name" style="font-size:1.1rem">Scegli<br>un personaggio</div>
+        <div style="width:100%;height:6px;background:#0a1520;border:1px solid #1a3a5a;margin-top:6px;border-radius:3px">
+          <div id="memory-fill" style="width:100%;height:100%;background:linear-gradient(90deg,#1a6aaa,#4acce0);border-radius:3px;transition:width 0.5s"></div>
+        </div>
+        <div style="font-size:.6rem;color:#4a7a9a;margin-top:2px">MEMORIA</div>
+      </div>
+    </div>
+    <div class="iv-sec">
+      <div class="iv-title">Equipaggiamento</div>
+      <div class="iv-hands">
+        <div class="iv-slot" id="iv-hand-l" data-label="Mano Sx"></div>
+        <div class="iv-slot" id="iv-hand-r" data-label="Mano Dx"></div>
+      </div>
+    </div>
+    <div class="iv-sec" style="flex:1">
+      <div class="iv-title">Zaino / Provviste</div>
+      <div id="isl"></div>
+    </div>
+  </div>
+  <!-- NOTIFICATION -->
+  <div id="nt"></div>
+  <!-- HUD BUTTONS -->
+  <div id="hud-btns" class="hidden" style="position:fixed;top:1rem;right:1rem;display:flex;gap:10px;z-index:70">
+    <button id="exit-quest-btn" title="Exit to Menu" style="display:none; font-family:var(--ft); font-size:0.95rem; font-weight:bold; background:linear-gradient(135deg, #c0392b, #962d22); color:#fff; border:1px solid #ebdcb9; border-radius:15px; padding:0.3em 1.2em; cursor:pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.5); transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="window.exitQuestLevel()">EXIT</button>
+    <button id="sb" title="Salva Partita" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">💾</button>
+    <button id="lb" title="Carica Partita" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">📂</button>
+    <button id="mb" title="Mute" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">🔊</button>
+  </div>
+  <!-- MAP OVERLAY -->
+  <div id="map-overlay" class="hidden">
+    <div class="map-container">
+      <img id="map-img" src="assets/Mappa_totale.png" alt="Mappa Totale">
+      <button id="close-map-btn">X</button>
+    </div>
+  </div>
+
+  <!-- INTRO INTRODUTTIVA STORIA (foglio pergamena con Title.png come sfondo) -->
+  <div id="intro-screen" class="hidden" style="position:fixed; inset:0; z-index:190; display:flex; align-items:center; justify-content:center; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('assets/Title.png?v=2') no-repeat center center; background-size: cover; padding: 20px;">
+    <div style="position:relative; width:min(90vw, 90vh, 640px); aspect-ratio: 1/1; background: url('assets/pergamena_bruciata.png?v=2') no-repeat center center; background-size: 100% 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.85); padding: 5.5rem 5.2rem 4.5rem; display:flex; flex-direction:column; align-items:center; color: #000000; box-sizing: border-box; text-align:center; justify-content:space-between;">
+      
+      <!-- Titolo statico in alto -->
+      <div style="width: 100%;">
+        <h2 style="font-family: var(--ft); font-size: 2.1rem; color: #000000; margin-bottom: 0.5rem; text-shadow: none; border-bottom: 2px dashed rgba(0, 0, 0, 0.4); padding-bottom: 0.4rem; width: 100%;">ISOLA SENZA NOME</h2>
+      </div>
+      
+      <!-- Area testo scorrevole interna (il testo rimane sempre dentro la pergamena) -->
+      <div style="width: 100%; flex: 1; overflow-y: auto; padding-right: 8px; margin-top: 0.5rem; margin-bottom: 0.8rem; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <p id="intro-text" style="font-family: var(--fb); font-size: 1.12rem; line-height: 1.65; text-align: center; color: #000000; font-style: italic; white-space: pre-wrap; font-weight: bold; margin: auto 0; width: 100%;"></p>
+      </div>
+      
+      <!-- Pulsante statico in basso -->
+      <button class="btn" onclick="confirmStartGame()" style="font-size:1.15rem; padding:.7em 2.2em; background:linear-gradient(135deg, #482a10, #693e18); border:2px solid #321c0b; color:#ebdcb9; box-shadow: 0 4px 15px rgba(72, 42, 16, 0.4), 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.2s; cursor:pointer;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+        PARTI ORA →
+      </button>
+    </div>
+  </div>
+
+  <!-- SCHERMATA DI TRANSIZIONE LIVELLO (win screen) -->
+  <div id="ws" class="hidden" style="position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#000;">
+    <!-- Immagine di transizione a tutto schermo -->
+    <div id="ws-img-wrap" style="position:absolute;inset:0;overflow:hidden;">
+      <img id="win-img" src="" alt="Transizione Livello" style="width:100%;height:100%;object-fit:cover;display:none;filter:brightness(0.72);">
+      <div id="win-icon" style="font-size:6rem;display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:radial-gradient(ellipse at center,#0a2535,#000);">⛵</div>
+      <!-- Overlay gradiente scuro in basso per leggibilità -->
+      <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.15) 70%, rgba(0,0,0,0) 100%);pointer-events:none;"></div>
+    </div>
+    <!-- Contenuto centrato in basso -->
+    <div class="wc" style="position:relative;z-index:2;text-align:center;padding:2rem;max-width:700px;width:100%;margin-top:auto;">
+      <!-- Badge livello superato -->
+      <div style="display:inline-block;background:rgba(200,160,64,0.15);border:1px solid rgba(200,160,64,0.5);border-radius:30px;padding:.3em 1.2em;font-family:'IM Fell English',serif;font-size:.8rem;letter-spacing:.2em;color:#c8a040;margin-bottom:.8rem;">✓ LIVELLO 1 COMPLETATO</div>
+      <h1 class="wt" id="wt" style="font-size:clamp(1.4rem,4vw,2.2rem);color:#e8d4a0;text-shadow:0 0 20px rgba(200,160,64,0.5);margin:.3em 0;">IL PORTO È ALLE SPALLE</h1>
+      <p class="wtx" id="wtx" style="font-size:clamp(.85rem,2.2vw,1.05rem);color:#b0c8d0;font-style:italic;line-height:1.6;margin:.5em auto;max-width:500px;">La barca taglia le acque impossibili del porto.<br>L'isola ti aspetta. Ti ricorderà di te?</p>
+      <div class="wco" id="wco" style="font-size:clamp(1rem,2.8vw,1.4rem);color:#4a9acc;letter-spacing:.2em;margin:1em 0;">♦ LIVELLO 2 ♦<br><span style="font-size:.85rem;font-style:italic;color:#6ab0cc;">La Foresta degli Orologi</span></div>
+      <div style="display:flex;gap:15px;justify-content:center;flex-wrap:wrap;margin-top:1.2rem;">
+        <button class="btn" id="restart-btn" onclick="location.reload()" style="font-size:.9rem;padding:.5em 1.4em;background:rgba(0,0,0,.5);border-color:rgba(255,255,255,.2);color:#aaa;">↺ RICOMINCIA</button>
+        <button class="btn" id="next-level-btn" style="font-size:1.05rem;padding:.65em 2em;background:linear-gradient(135deg,#1a5a2a,#2a8a4a);border-color:#3aaa5a;letter-spacing:.1em;box-shadow:0 0 20px rgba(42,138,74,0.4);">🌿 LIVELLO 2 — AVANTI →</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- EDITOR UI -->
+  <div id="editor-ui" class="hidden">
+    <div id="editor-topbar" class="editor-panel">
+      <button id="ed-btn-translate" class="active">TRANSFORM</button>
+      <button id="ed-btn-rotate">ROTATION</button>
+      <button id="ed-btn-scale">SCALE</button>
+      <div style="flex:1"></div>
+      <button id="ed-btn-import-glb" style="background:#d35400; border-color:#e67e22">IMPORTA GLB</button>
+      <input type="file" id="ed-glb-import-file" accept=".glb,.gltf" style="display:none;">
+      <button id="ed-btn-save" style="background:#27ae60; border-color:#2ecc71; margin-left: 15px;">SALVA LIVELLO</button>
+      <button id="ed-btn-load" style="background:#2980b9; border-color:#3498db">CARICA LIVELLO</button>
+      <button id="ed-btn-camera" style="background:#8e44ad; border-color:#9b59b6; margin-left: 15px;">SALVA CAMERA</button>
+      <button id="ed-btn-close" style="margin-left: 15px; background:#c0392b; border-color:#e74c3c">ESCI (CTRL+E)</button>
+    </div>
+    <div class="editor-main">
+      <div id="editor-left" class="editor-panel">
+        <div class="editor-header">Scene Objects</div>
+        <ul id="editor-obj-list"></ul>
+      </div>
+      <div id="editor-right" class="editor-panel">
+        <div class="editor-header" id="editor-prop-title">Properties</div>
+        
+        <div class="prop-group">
+          <label>Position</label>
+          <div class="prop-row"><span>X</span><input type="number" step="0.1" id="ed-px"></div>
+          <div class="prop-row"><span>Y</span><input type="number" step="0.1" id="ed-py"></div>
+          <div class="prop-row"><span>Z</span><input type="number" step="0.1" id="ed-pz"></div>
+        </div>
+        
+        <div class="prop-group">
+          <label>Rotation (Degrees)</label>
+          <div class="prop-row"><span>X</span><input type="number" step="1" id="ed-rx"></div>
+          <div class="prop-row"><span>Y</span><input type="number" step="1" id="ed-ry"></div>
+          <div class="prop-row"><span>Z</span><input type="number" step="1" id="ed-rz"></div>
+        </div>
+        
+        <div class="prop-group">
+          <label>Scale</label>
+          <div class="prop-row"><span>X</span><input type="number" step="0.1" id="ed-sx"></div>
+          <div class="prop-row"><span>Y</span><input type="number" step="0.1" id="ed-sy"></div>
+          <div class="prop-row"><span>Z</span><input type="number" step="0.1" id="ed-sz"></div>
+        </div>
+
+        <div class="prop-group" id="ed-glb-group">
+          <label>Modello 3D GLB</label>
+          <div class="prop-row">
+            <input type="file" id="ed-glb-file" accept=".glb,.gltf" style="display:none;">
+            <button onclick="document.getElementById('ed-glb-file').click()" style="width:100%; padding:5px; background:#34495e; border:1px solid #555; color:#fff; cursor:pointer; font-weight:bold;">Scegli file GLB...</button>
+          </div>
+          <div id="ed-glb-path" style="font-size:0.75rem; color:#888; margin-top:5px; word-break:break-all;">Nessun modello personalizzato</div>
+        </div>
+
+        <div class="prop-group" id="ed-anims-group" style="display:none;">
+          <label>Animazioni Caricate</label>
+          <div id="ed-anims-list" style="max-height:100px; overflow-y:auto; background:#111; padding:5px; font-size:0.8rem; border:1px solid #334; margin-bottom:10px;"></div>
+          
+          <label>Mappa Animazioni di Gioco</label>
+          <div class="prop-row" style="font-size:0.8rem;"><span>Idle</span>
+            <select id="ed-anim-idle" style="flex:1; background:#111; border:1px solid #555; color:#fff; padding:3px;"></select>
+          </div>
+          <div class="prop-row" style="font-size:0.8rem; margin-top:5px;"><span>Walk</span>
+            <select id="ed-anim-walk" style="flex:1; background:#111; border:1px solid #555; color:#fff; padding:3px;"></select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/TransformControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="js/data.js?v=3.1"></script>
+<script src="js/scenes/PortoScene.js?v=3.1"></script>
+<script src="js/scenes/ForestaScene.js?v=3.1"></script>
+<script src="js/scenes/AlbergoScene.js?v=3.1"></script>
+<script src="js/scenes/QuestScene.js?v=3.1"></script>
+<script src="js/scenes/MineraScene.js?v=4.0"></script>
+<script src="js/scenes/CittaSommersa.js?v=4.0"></script>
+<script>
+// ============================================================
+// Isla Perdida - Il Tesoro dei Pirati
+// Motore di gioco single-file (No ES Modules per supportare file://)
+// Fallback per variabili globali
+if (typeof FRASE_LOG === 'undefined') window.FRASE_LOG = [];
+if (typeof GAME_DATA === 'undefined') window.GAME_DATA = { characters: {}, items: {}, dialogs_l1: {} };
+
+
+/* ── AUDIO GENERATIVO ── */
+class AudioGen {
+  constructor() {
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.muted = false;
+    this.notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88]; // C4 to B4
+    this.isPlaying = false;
+  }
+  toggle() {
+    this.muted = !this.muted;
+    if(!this.muted && !this.isPlaying) this.playBg();
+    return this.muted;
+  }
+  playTone(freq, type='sine', dur=0.5, vol=0.1) {
+    if(this.muted || !this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+    gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    osc.stop(this.ctx.currentTime + dur);
+  }
+  playBg() {
+    this.isPlaying = true;
+    if(this.muted) { this.isPlaying = false; return; }
+    const note = this.notes[Math.floor(Math.random()*this.notes.length)] / 2; // Octave lower
+    this.playTone(note, 'triangle', 2, 0.05);
+    setTimeout(() => this.playBg(), 2000 + Math.random()*2000);
+  }
+  playClick() { this.playTone(800, 'sine', 0.1, 0.1); }
+  playWin() {
+    [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+      setTimeout(() => this.playTone(f, 'square', 0.5, 0.1), i * 150);
+    });
+  }
+}
+
+/* ── SISTEMA DIALOGHI (nuovo) ── */
+class DialogSystem {
+  constructor(game) {
+    this.g = game;
+    this.box = document.getElementById('db');
+    this.spk = document.getElementById('dsp');
+    this.txt = document.getElementById('dtx');
+    this.chc = document.getElementById('dch');
+    this.portrait = document.getElementById('dpo');
+  }
+  
+  start(nodes, startNodeId = 'start') {
+    this.nodes = nodes;
+    this.g.state = 'DIALOG';
+    this.show(startNodeId);
+  }
+  
+  show(id) {
+    const node = this.nodes.find(n => n.id === id);
+    if(!node) { this.end(); return; }
+    if(node.portrait) this.portrait.textContent = node.portrait;
+    this.spk.textContent = node.speaker;
+    this.txt.textContent = '';
+    this.chc.innerHTML = '';
+    this.box.classList.remove('hidden');
+    // Log frase per l'enigma finale
+    if(node.text) FRASE_LOG.push(node.text);
+    // Typewriter
+    let i = 0;
+    const int = setInterval(() => {
+      this.txt.textContent += node.text[i++];
+      if(i >= node.text.length) {
+        clearInterval(int);
+        if(!node.choices || node.choices.length === 0) {
+          // Esegui action se presente
+          if(node.action) this.g.handleAction(node.action);
+          if(node.flag) this.g.setFlag(node.flag);
+          if(node.giveFlag) this.g.setFlag(node.giveFlag);
+          // Consuma oggetto dall'inventario (usato per risolvere l'enigma)
+          if(node.consumeItem) {
+            this.g.inv.rem(node.consumeItem);
+          }
+           // Aggiungi oggetto/i all'inventario se previsto dal nodo
+           if(node.giveItem) {
+             const itemsToGive = typeof node.giveItem === 'string' && node.giveItem.includes(',') 
+               ? node.giveItem.split(',') 
+               : (Array.isArray(node.giveItem) ? node.giveItem : [node.giveItem]);
+             itemsToGive.forEach(itemId => {
+               const cleanedId = itemId.trim();
+               this.g.inv.add(cleanedId);
+               const itemDef = GAME_DATA.items[cleanedId];
+               if(itemDef) this.g.notify(`${itemDef.emoji} Hai ricevuto: ${itemDef.name}`);
+             });
+           }
+           setTimeout(() => this.end(), 1800);
+        } else {
+          this.buildChoices(node.choices);
+        }
+      }
+    }, 22);
+  }
+  
+  buildChoices(choices) {
+    choices.forEach(c => {
+      if(c.requireItem && !this.g.inv.has(c.requireItem)) return;
+      if(c.requireEquipped && this.g.inv.equipped.left !== c.requireEquipped && this.g.inv.equipped.right !== c.requireEquipped) return;
+      // Supporta requireFlag con sintassi negativa (es: '!preso_chiave_404' = flag NON settato)
+      if(c.requireFlag) {
+        if(c.requireFlag.startsWith('!')) {
+          const flagName = c.requireFlag.slice(1);
+          if(this.g.flags[flagName]) return; // flag settato → nascondi scelta
+        } else {
+          if(!this.g.flags[c.requireFlag]) return; // flag non settato → nascondi scelta
+        }
+      }
+      const b = document.createElement('button');
+      b.className = 'cb';
+      b.textContent = c.text;
+      b.onclick = () => {
+        if(c.action) this.g.handleAction(c.action);
+        if(c.giveFlag) this.g.setFlag(c.giveFlag);
+        // Gestisci consumeItem/giveItem anche nelle scelte (non solo nei nodi foglia)
+        if(c.consumeItem) this.g.inv.rem(c.consumeItem);
+        if(c.giveItem) {
+          const itemsToGive = typeof c.giveItem === 'string' && c.giveItem.includes(',')
+            ? c.giveItem.split(',')
+            : (Array.isArray(c.giveItem) ? c.giveItem : [c.giveItem]);
+          itemsToGive.forEach(itemId => {
+            const cleanedId = itemId.trim();
+            this.g.inv.add(cleanedId);
+            const itemDef = GAME_DATA.items[cleanedId];
+            if(itemDef) this.g.notify(`${itemDef.emoji} Hai ricevuto: ${itemDef.name}`);
+          });
+        }
+        if(!c.next || c.next === 'end') { this.end(); return; }
+        this.show(c.next);
+      };
+      this.chc.appendChild(b);
+    });
+  }
+  
+  end() {
+    this.box.classList.add('hidden');
+    this.g.state = 'PLAY';
+  }
+}
+
+/* ── INVENTORY ── */
+class Inventory {
+
+  constructor(game) {
+    this.g = game;
+    this.items = Array(12).fill(null);
+    this.equipped = { left: null, right: null };
+    this.slots = document.getElementById('isl');
+    this.hL = document.getElementById('iv-hand-l');
+    this.hR = document.getElementById('iv-hand-r');
+
+    const setupHandSlot = (slotNode, hand) => {
+      slotNode.ondragover = (e) => e.preventDefault();
+      slotNode.ondrop = (e) => {
+        e.preventDefault();
+        const itemId = e.dataTransfer.getData('text/plain');
+        if (itemId) {
+          this.equip(itemId, hand);
+        }
+      };
+    };
+    if (this.hL) setupHandSlot(this.hL, 'left');
+    if (this.hR) setupHandSlot(this.hR, 'right');
+  }
+  add(id) { 
+    const idx = this.items.indexOf(null);
+    if(idx !== -1 && !this.has(id)) this.items[idx] = id;
+    this.render(); 
+  }
+  rem(id) { 
+    const idx = this.items.indexOf(id);
+    if(idx !== -1) this.items[idx] = null;
+    if(this.equipped.left === id) this.equipped.left = null;
+    if(this.equipped.right === id) this.equipped.right = null;
+    this.render(); 
+  }
+  has(id) { return this.items.includes(id); }
+  equip(id, hand) {
+    if(hand === 'left') this.equipped.left = id;
+    if(hand === 'right') this.equipped.right = id;
+    this.render();
+  }
+  render() {
+    this.slots.innerHTML = '';
+    for (let i = 0; i < 12; i++) {
+      const id = this.items[i];
+      const div = document.createElement('div');
+      div.className = 'is';
+      div.dataset.slot = i;
+      
+      div.ondragover = (e) => e.preventDefault();
+      div.ondrop = (e) => {
+        e.preventDefault();
+        const fromSlot = parseInt(e.dataTransfer.getData('slot'));
+        if(!isNaN(fromSlot) && fromSlot !== i) {
+          const temp = this.items[i];
+          this.items[i] = this.items[fromSlot];
+          this.items[fromSlot] = temp;
+          this.render();
+        }
+      };
+
+      if(id) {
+        const itemDef = (GAME_DATA && GAME_DATA.items[id]) || { emoji: '?', name: id };
+        const memPct = this.g.memory / 100;
+        const displayName = (memPct < 0.4 && itemDef.nameCorrupt) ? itemDef.nameCorrupt : itemDef.name;
+        
+        div.draggable = true;
+        div.ondragstart = (e) => {
+          e.dataTransfer.setData('text/plain', id);
+          e.dataTransfer.setData('slot', i);
+          div.style.opacity = '0.5';
+        };
+        div.ondragend = () => { div.style.opacity = '1'; };
+        
+        div.innerHTML = `<div class="ie">${itemDef.emoji || '?'}</div><div class="in">${displayName}</div>`;
+        div.onclick = () => {
+          if (id === 'mappa_bagnata') {
+            this.g.openMap();
+          } else if (id === 'diario_incompleto') {
+            this.g.openImageOverlay('assets/pagina_diario.png');
+          } else {
+            const isProvvista = (id === 'pesce_essiccato' || id === 'acqua_dolce' || id === 'mango_fluorescente');
+            const itemDef = (GAME_DATA && GAME_DATA.items[id]) || { emoji: '?', name: id };
+            const memPct = this.g.memory / 100;
+            const displayName = (memPct < 0.4 && itemDef.nameCorrupt) ? itemDef.nameCorrupt : itemDef.name;
+            
+            let extraActionHtml = '';
+            if (isProvvista) {
+              extraActionHtml = ` <button id="use-item-btn" style="background:#27ae60; border:none; color:white; padding:4px 10px; border-radius:4px; cursor:pointer; font-weight:bold; margin-right:5px; font-family:var(--fb); font-size:0.85rem; box-shadow: 0 0 5px rgba(39,174,96,0.5);">CONSUMA</button>`;
+            }
+            
+            let fullMsg = `${itemDef.emoji} <strong>${displayName}</strong>: ${itemDef.desc || ''}`;
+            if (itemDef.hint) {
+              fullMsg += `<div style="margin-top: 10px; padding: 10px; background: rgba(200, 160, 64, 0.12); border-left: 4px solid var(--gold); border-radius: 4px; font-size: 0.92rem; color: #ebdcb9; font-family: var(--fb); line-height: 1.45; text-align: left; box-sizing: border-box;">💡 <strong>Suggerimento:</strong> <em>${itemDef.hint}</em></div>`;
+            }
+            
+            this.g.notify(fullMsg, true, () => {
+              if (isProvvista) {
+                const useBtn = document.getElementById('use-item-btn');
+                if (useBtn) {
+                  useBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (id === 'pesce_essiccato') {
+                      this.g.updateHealth(40);
+                      this.rem(id);
+                      this.g.notify("🐟 Mangiato Pesce Essiccato (+40% Salute)");
+                      this.g.audio.playTone(450, 'sine', 0.2, 0.1);
+                    } else if (id === 'acqua_dolce') {
+                      this.g.updateHealth(50);
+                      this.rem(id);
+                      this.g.notify("🥛 Bevuto Acqua Dolce (+50% Salute)");
+                      this.g.audio.playTone(500, 'sine', 0.25, 0.1);
+                    } else if (id === 'mango_fluorescente') {
+                      this.g.updateHealth(40);
+                      this.rem(id);
+                      this.g.notify("🟢 Mangiato Mango Fluorescente (+40% Salute)");
+                      this.g.audio.playTone(450, 'sine', 0.2, 0.1);
+                    }
+                  };
+                }
+              }
+            }, extraActionHtml);
+            
+            this.g.audio.playClick();
+          }
+        };
+        div.ondblclick = () => {
+          if (this.equipped.right === id) {
+            this.equip(null, 'right');
+            this.g.notify("Mano destra libera.");
+          } else if (this.equipped.left === id) {
+            this.equip(null, 'left');
+            this.g.notify("Mano sinistra libera.");
+          } else {
+            this.equip(id, 'right');
+            this.g.notify(`Equipaggiato ${displayName} in Mano Dx.`);
+          }
+          this.g.audio.playTone(600, 'sine', 0.08, 0.15);
+        };
+      }
+      this.slots.appendChild(div);
+    }
+
+    const renderHand = (node, id) => {
+      node.innerHTML = '';
+      if(id) {
+        const itemDef = GAME_DATA.items[id];
+        node.innerHTML = `<span class="ie" style="font-size:2.5rem">${itemDef ? itemDef.emoji : '?'}</span>`;
+        node.onclick = () => { this.equip(null, node.id.includes('l')?'left':'right'); };
+      } else {
+        node.onclick = null;
+      }
+    };
+    renderHand(this.hL, this.equipped.left);
+    renderHand(this.hR, this.equipped.right);
+  }
+}
+
+/* ── PLAYER ── */
+class Player {
+  constructor(scene) {
+    this.scene = scene;
+    this.grp = new THREE.Group();
+    this.target = new THREE.Vector3();
+    this.moving = false;
+    this.mixer = null;
+    this.anims = {};
+    this.currentAnim = null;
+    this.currentAnimName = null;
+    this.attacking = false;
+    this._spaceWasDown = false;
+
+    // Velocità di camminata
+    this.walkSpeed = 4.8;
+    // Lunghezza di un passo completo dell'animazione Pirata_walk (unità-scena).
+    // Calibra questo valore finché i piedi non scivolano.
+    this._walkStride = 2.0;
+    this._walkAnimRefSpeed = null; // calcolato dopo il caricamento della clip
+
+    // ── Collisioni ──
+    this.radius = 0.4;           // raggio capsule del player
+    this.staticColliders = [];   // { minX, maxX, minZ, maxZ }
+    this.npcColliders = [];      // { mesh, radius }
+    
+    // Fake ombra sotto il player
+    const shadow = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.8), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0.3}));
+    shadow.rotation.x = -Math.PI/2;
+    shadow.position.y = 0.01;
+    this.grp.add(shadow);
+    
+    scene.add(this.grp);
+
+    const loader = new THREE.GLTFLoader();
+    loader.load('assets/the_pirate_girl.glb', 
+      (gltf) => {
+        this.model = gltf.scene;
+        this.model.scale.set(1.2, 1.2, 1.2);
+        this.model.traverse(child => {
+          if(child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        this.grp.add(this.model);
+
+        this.mixer = new THREE.AnimationMixer(this.model);
+        // Registra tutte le clip con nome originale (case‑sensitive)
+        gltf.animations.forEach(clip => {
+          this.anims[clip.name] = this.mixer.clipAction(clip);
+        });
+
+        // Calcola la velocità di riferimento dell'animazione Pirata_walk
+        const walkClip = gltf.animations.find(c => c.name === 'Pirata_walk');
+        if (walkClip && walkClip.duration > 0) {
+          this._walkAnimRefSpeed = this._walkStride / walkClip.duration;
+          console.log(`[Player] walk refSpeed=${this._walkAnimRefSpeed.toFixed(3)} u/s  (stride=${this._walkStride}, dur=${walkClip.duration.toFixed(3)}s)`);
+        }
+
+        console.log('[Player] Animazioni disponibili:', Object.keys(this.anims));
+        this._switchAnim('Pirata_idle');
+      },
+      undefined,
+      (err) => {
+        console.warn("Model not found, using placeholder", err);
+        const geo = new THREE.CapsuleGeometry(0.3, 1, 4, 8);
+        const mat = new THREE.MeshLambertMaterial({color: 0x4a6a8a});
+        this.model = new THREE.Mesh(geo, mat);
+        this.model.position.y = 0.8;
+        this.model.castShadow = true;
+        this.grp.add(this.model);
+      }
+    );
+  }
+
+  /** Registra un collider AABB statico (edificio, muro, oggetto). */
+  addStaticCollider(cx, cz, halfW, halfD) {
+    this.staticColliders.push({
+      minX: cx - halfW, maxX: cx + halfW,
+      minZ: cz - halfD, maxZ: cz + halfD
+    });
+  }
+
+  /** Registra un NPC come collider dinamico. */
+  addNPCCollider(npcMesh, radius = 0.55) {
+    this.npcColliders.push({ mesh: npcMesh, radius });
+  }
+
+  /** Cambia animazione con crossfade. name = 'Pirata_idle' | 'Pirata_walk' | 'Pirata_attack1' */
+  _switchAnim(name, fadeDuration = 0.25) {
+    const next = this.anims[name];
+    if (!next) return; // animazione non trovata nel GLB
+    if (this.currentAnim === next) return; // già in esecuzione
+    if (this.currentAnim) this.currentAnim.fadeOut(fadeDuration);
+    next.reset().fadeIn(fadeDuration).play();
+    this.currentAnim = next;
+    this.currentAnimName = name;
+  }
+
+  /** Sincronizza il timeScale di Pirata_walk con la velocità effettiva. */
+  _syncWalkAnim(actualSpeed) {
+    const action = this.anims['Pirata_walk'];
+    if (!action) return;
+    if (this._walkAnimRefSpeed && this._walkAnimRefSpeed > 0) {
+      action.timeScale = actualSpeed / this._walkAnimRefSpeed;
+    }
+  }
+
+  /**
+   * Risolve penetrazione contro collider AABB statici (MTV - Minimum Translation Vector).
+   * Eseguito DOPO ogni spostamento.
+   */
+  _resolveStaticCollisions() {
+    for (let iter = 0; iter < 3; iter++) { // 3 iterazioni per angoli
+      const px = this.grp.position.x;
+      const pz = this.grp.position.z;
+      const r  = this.radius;
+      let resolved = true;
+
+      for (const col of this.staticColliders) {
+        // Punto più vicino del AABB al centro del player
+        const nearX = Math.max(col.minX, Math.min(px, col.maxX));
+        const nearZ = Math.max(col.minZ, Math.min(pz, col.maxZ));
+        const dx = px - nearX;
+        const dz = pz - nearZ;
+        const distSq = dx * dx + dz * dz;
+
+        if (distSq < r * r) {
+          resolved = false;
+          if (distSq > 0.000001) {
+            const dist = Math.sqrt(distSq);
+            const pen  = r - dist;
+            this.grp.position.x += (dx / dist) * pen;
+            this.grp.position.z += (dz / dist) * pen;
+          } else {
+            // Player esattamente dentro: espelli verso Z positivo
+            this.grp.position.z = col.maxZ + r + 0.01;
+          }
+        }
+      }
+      if (resolved) break;
+    }
+  }
+
+  /**
+   * Risolve collisioni cerchio-cerchio con gli NPC.
+   */
+  _resolveNPCCollisions() {
+    for (const npc of this.npcColliders) {
+      if (!npc.mesh || !npc.mesh.parent) continue; // NPC rimosso dalla scena
+      const npx = npc.mesh.position.x;
+      const npz = npc.mesh.position.z;
+      const dx = this.grp.position.x - npx;
+      const dz = this.grp.position.z - npz;
+      const distSq = dx * dx + dz * dz;
+      const minDist = this.radius + npc.radius;
+
+      if (distSq < minDist * minDist && distSq > 0.000001) {
+        const dist = Math.sqrt(distSq);
+        const pen  = minDist - dist;
+        // 70% player si sposta, 30% l'NPC cede
+        this.grp.position.x += (dx / dist) * pen * 0.7;
+        this.grp.position.z += (dz / dist) * pen * 0.7;
+        npc.mesh.position.x -= (dx / dist) * pen * 0.3;
+        npc.mesh.position.z -= (dz / dist) * pen * 0.3;
+      }
+    }
+  }
+
+  move(x, z) {
+    this.target.set(x, 0, z);
+    this.moving = true;
+    if (!this.attacking) this._switchAnim('Pirata_walk');
+  }
+
+  /** Lancia l'animazione di attacco, poi torna all'idle dopo la durata della clip */
+  attack() {
+    if (this.attacking) return;
+    this.attacking = true;
+    this._switchAnim('Pirata_attack1', 0.1);
+    const attackClip = this.anims['Pirata_attack1'];
+    const duration = attackClip ? attackClip.getClip().duration * 1000 : 800;
+    setTimeout(() => {
+      this.attacking = false;
+      this._switchAnim(this.moving ? 'Pirata_walk' : 'Pirata_idle', 0.15);
+    }, duration - 100);
+  }
+
+  update(dt, keys = {}) {
+    const prevX = this.grp.position.x;
+    const prevY = this.grp.position.y;
+    const prevZ = this.grp.position.z;
+
+    if(this.mixer) this.mixer.update(dt);
+
+    // Attacco con Spazio (una volta per pressione)
+    if (keys[' '] && !this._spaceWasDown) {
+      this._spaceWasDown = true;
+      this.attack();
+    }
+    if (!keys[' ']) this._spaceWasDown = false;
+
+    if (this.attacking) return; // Blocca movimento durante attacco
+    
+    // Movimento da tastiera
+    let dirX = 0;
+    let dirZ = 0;
+    if(keys['ArrowUp']    || keys['w'] || keys['W']) dirZ = -1;
+    if(keys['ArrowDown']  || keys['s'] || keys['S']) dirZ =  1;
+    if(keys['ArrowLeft']  || keys['a'] || keys['A']) dirX = -1;
+    if(keys['ArrowRight'] || keys['d'] || keys['D']) dirX =  1;
+
+    if(dirX !== 0 || dirZ !== 0) {
+      this.moving = false; // Annulla auto-movimento verso oggetto
+      const len = Math.sqrt(dirX * dirX + dirZ * dirZ);
+      const normX = dirX / len;
+      const normZ = dirZ / len;
+      const speed = this.walkSpeed;
+      this.grp.position.x += normX * speed * dt;
+      this.grp.position.z += normZ * speed * dt;
+      this.grp.rotation.y = Math.atan2(normX, normZ);
+      this._switchAnim('Pirata_walk');
+      this._syncWalkAnim(speed);
+    } else if(this.moving) {
+      // Auto-movimento verso target (interazione oggetti)
+      const dx = this.target.x - this.grp.position.x;
+      const dz = this.target.z - this.grp.position.z;
+      const dist = Math.sqrt(dx*dx + dz*dz);
+      if(dist > 0.1) {
+        this.grp.position.x += (dx/dist) * this.walkSpeed * dt;
+        this.grp.position.z += (dz/dist) * this.walkSpeed * dt;
+        this.grp.rotation.y = Math.atan2(dx, dz);
+        this._switchAnim('Pirata_walk');
+        this._syncWalkAnim(this.walkSpeed);
+      } else {
+        this.moving = false;
+      }
+    } else {
+      // Idle
+      this._switchAnim('Pirata_idle');
+    }
+
+    // Risolvi collisioni dopo ogni spostamento
+    this._resolveStaticCollisions();
+    this._resolveNPCCollisions();
+
+    // Allineamento altezza al terreno (salita scalini e dislivelli) ed evitare cadute in mare
+    if (this.scene) {
+      const rayStart = new THREE.Vector3(this.grp.position.x, this.grp.position.y + 5, this.grp.position.z);
+      const rayDir = new THREE.Vector3(0, -1, 0);
+      const raycaster = new THREE.Raycaster(rayStart, rayDir, 0, 10);
+      
+      const targets = [];
+      this.scene.traverse(child => {
+        if (child.isMesh && child !== this.model && !child.name.includes('Cielo') && !child.name.includes('Acqua') && (!child.name.includes('Helper') || child.name.includes('Walkable')) && !child.type.includes('Light')) {
+          let isPlayerChild = false;
+          child.traverseAncestors(ancestor => {
+            if (ancestor === this.grp) isPlayerChild = true;
+          });
+          if (!isPlayerChild) {
+            targets.push(child);
+          }
+        }
+      });
+      
+      let groundY = -999;
+      const hits = raycaster.intersectObjects(targets, true);
+      if (hits.length > 0) {
+        for (let hit of hits) {
+          const diff = hit.point.y - this.grp.position.y;
+          // Permettiamo di salire scalini di altezza fino a 1.2 unità e camminare su dislivelli
+          if (diff <= 1.2 && hit.point.y > groundY) {
+            groundY = hit.point.y;
+          }
+        }
+      }
+
+      // Se non c'è terreno calpestabile sotto i piedi o se l'altezza trovata è a livello mare (sotto -0.05), blocca il movimento
+      if (groundY === -999 || groundY < -0.05) {
+        this.grp.position.x = prevX;
+        this.grp.position.y = prevY;
+        this.grp.position.z = prevZ;
+        this.moving = false;
+      } else {
+        this.grp.position.y = groundY;
+      }
+    }
+  }
+} // end class Player
+
+
+class Game {
+  constructor() {
+    this.lang = 'it';
+    this.state = 'LOAD';
+    this.memory = 100;
+    this.health = 100;
+    this.flags = {};
+    this.inv = new Inventory(this);
+    this.ds = new DialogSystem(this);
+    this.audio = new AudioGen();
+    this.charId = null;
+    this.keys = {};
+    
+    window.addEventListener('keydown', e => { this.keys[e.key] = true; });
+    window.addEventListener('keyup', e => { this.keys[e.key] = false; });
+    
+    this.renderer = new THREE.WebGLRenderer({canvas: document.getElementById('cv'), antialias: true});
+    const cw = window.innerWidth - (window.innerWidth > 768 ? 320 : 0);
+    this.renderer.setSize(cw, window.innerHeight);
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    
+    this.camera = new THREE.PerspectiveCamera(45, cw/window.innerHeight, 0.1, 200);
+    this.camera.position.set(0, 7, 9);
+    this.camera.lookAt(0, 0, 0);
+    
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2(-999,-999);
+    this.clock = new THREE.Clock();
+    
+    this.curSceneId = 'porto';
+    this.scenes = { porto: PortoScene, foresta: ForestaScene, albergo: AlbergoScene, quest: window.QuestScene, minera: window.MineraScene, citta: window.CittaSommersa };
+    this.sceneNames = {
+      it: { porto: 'Il Porto delle Maree Morte', foresta: 'La Foresta degli Orologi', albergo: 'L\'Albergo delle Ombre', quest: 'Livello Tutorial — Quest', minera: 'La Miniera del Sole Nero', citta: 'La Città Sommersa' },
+      en: { porto: 'The Port of Dead Tides', foresta: 'The Forest of Clocks', albergo: 'The Hotel of Shadows', quest: 'Tutorial Level — Quest', minera: 'The Black Sun Mine', citta: 'The Sunken City' }
+    };
+    
+    window.addEventListener('resize', () => {
+      const cw = window.innerWidth - (window.innerWidth > 768 ? 320 : 0);
+      this.renderer.setSize(cw, window.innerHeight);
+      this.camera.aspect = cw/window.innerHeight;
+      this.camera.updateProjectionMatrix();
+    });
+    
+    const cv = document.getElementById('cv');
+    const setMouse = (cx, cy) => {
+      const cw = window.innerWidth - (window.innerWidth > 768 ? 320 : 0);
+      this.mouse.x = (cx / cw)*2 - 1;
+      this.mouse.y = -(cy / window.innerHeight)*2 + 1;
+    };
+    
+    cv.addEventListener('mousemove', e => setMouse(e.clientX, e.clientY));
+    cv.addEventListener('mousedown', (e) => { 
+      this.isPressed = true; 
+      setMouse(e.clientX, e.clientY);
+      this.onClick(); 
+    });
+    window.addEventListener('mouseup', () => { this.isPressed = false; });
+    
+    cv.addEventListener('touchstart', e => {
+      this.isPressed = true;
+      setMouse(e.touches[0].clientX, e.touches[0].clientY);
+      this.onClick();
+    }, {passive:true});
+    window.addEventListener('touchend', () => { this.isPressed = false; });
+    cv.addEventListener('touchmove', e => {
+      setMouse(e.touches[0].clientX, e.touches[0].clientY);
+    }, {passive:true});
+    
+    cv.addEventListener('dragover', e => e.preventDefault());
+    cv.addEventListener('drop', e => {
+      e.preventDefault();
+      if(this.state !== 'PLAY') return;
+      const itemId = e.dataTransfer.getData('text/plain');
+      if(!itemId) return;
+      
+      setMouse(e.clientX, e.clientY);
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+      if(this.curScene && this.curScene.objs) {
+        const hits = this.raycaster.intersectObjects(this.curScene.objs.map(o => o.mesh), true);
+        if(hits.length > 0) {
+          const obj = this._getHitObj(hits[0].object);
+          if(obj && obj.onDrop) {
+            this.player.move(obj.walkTarget.x, obj.walkTarget.z);
+            this.pendingAction = { tgt: obj.walkTarget, fn: () => obj.onDrop(itemId) };
+          } else if(!obj || !obj.onDrop) {
+            this.notify("Non puoi usare " + (GAME_DATA.items[itemId]?.name || "questo") + " qui.");
+          }
+        }
+      }
+    });
+    
+    document.getElementById('mb').onclick = (e) => {
+      const muted = this.audio.toggle();
+      e.target.textContent = muted ? '🔇' : '🔊';
+    };
+    
+    document.getElementById('close-map-btn').onclick = () => {
+      this.closeMap();
+    };
+    document.getElementById('map-overlay').onclick = (e) => {
+      if (e.target.id === 'map-overlay') {
+        this.closeMap();
+      }
+    };
+    
+    // Configura i controlli touch per mobile
+    const setupMobileKey = (btnId, keyName) => {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        btn.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          this.keys[keyName] = true;
+        }, {passive: false});
+        btn.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          this.keys[keyName] = false;
+        }, {passive: false});
+      }
+    };
+    setupMobileKey('mbtn-up', 'w');
+    setupMobileKey('mbtn-left', 'a');
+    setupMobileKey('mbtn-down', 's');
+    setupMobileKey('mbtn-right', 'd');
+    setupMobileKey('mbtn-attack', ' ');
+
+    this.initOrbitControls();
+    this.initEditor();
+    this.loop();
+  }
+
+  showCharSelect() {
+    document.getElementById('ts').classList.add('hidden');
+    document.getElementById('char-select').classList.remove('hidden');
+  }
+
+  selectChar(id) {
+    this.charId = id;
+    const data = GAME_DATA.characters[id];
+    document.querySelectorAll('.cs-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('card-' + id).classList.add('selected');
+    document.getElementById('iv-face').textContent = data.emoji;
+    document.getElementById('iv-name').innerHTML = data.name.replace(' ', '<br>');
+    
+    // Transizione alla schermata del menu con sfondo Menu_01.png
+    setTimeout(() => {
+      document.getElementById('char-select').classList.add('hidden');
+      document.getElementById('game-menu').classList.remove('hidden');
+    }, 500);
+  }
+
+  startDialog(id, nodes, startNodeId = 'start') {
+    this.ds.start(nodes, startNodeId);
+  }
+
+  showIntro() {
+    const data = GAME_DATA.characters[this.charId] || { name: 'Valentine Black' };
+    const charDesc = this.charId === 'elias' 
+      ? "Elias Crow, un audace pirata spinto dall'insaziabile desiderio di svelare i segreti dell'isola e dei suoi leggendari tesori perduti."
+      : "Valentine Black, una coraggiosa pirata esploratrice guidata dai misteri di un'antica mappa stellare.";
+      
+    const text = `Benvenuto a Isla Perdida, una terra avvolta da nebbie e maree eterne.
+
+Si sussurra che quest'isola sia senziente e famelica: si nutre dei ricordi di chi vi sbarca, cancellando giorno dopo giorno volti, nomi e passato fino a lasciare solo ombre.
+
+Tu sei ${charDesc}
+
+Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Morte. Riuscirai a svelare i misteri dell'orologio maestro e sfuggire a questa terra dimenticata prima che l'isola cancelli ogni traccia di chi sei?`;
+
+    document.getElementById('intro-text').textContent = text;
+    document.getElementById('intro-screen').classList.remove('hidden');
+  }
+
+  startGame() {
+    // Evita il doppio avvio se già in gioco
+    if (this.state === 'PLAY') return;
+    this.audio.ctx.resume();
+    document.getElementById('char-select').classList.add('hidden');
+    document.getElementById('game-menu').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+    document.getElementById('hud-btns').classList.remove('hidden');
+    document.getElementById('iv').classList.remove('hidden');
+    this.loadScene(this.curSceneId, -5, 1.52);
+    this.state = 'PLAY';
+    if (!this.inv.has('mappa_bagnata')) {
+      this.inv.add('mappa_bagnata');
+    }
+  }
+
+  handleAction(action) {
+    if(action === 'LEVEL1_WIN') this.win_level1();
+    if(action === 'LEVEL2_WIN') this.win_level2();
+    if(action === 'LEVEL3_WIN') this.win_level3();
+    if(action === 'LEVEL4_WIN') this.win_level4();
+    if(action === 'LEVEL5_WIN') this.win_level5();
+    if(action === 'OBREN_REVEALED') {
+      // La MineraScene gestisce internamente la rivelazione del passaggio,
+      // ma qui possiamo aggiungere effetti extra
+      this.setFlag('obren_svelato');
+      this.notify('🗗️ Un passaggio segreto si apre nella parete di fondo!');
+    }
+    if(action === 'TORNA_LIVELLO1') {
+      this.torna_livello1();
+    }
+    if(action === 'ALTERA_FUTURO') {
+      this.setFlag('futuro_alterato');
+      this.notify('🔥 L\'incendio nella Stanza 404 è stato spento! Il futuro è cambiato!');
+      // Cambia lo stato della stanza 404
+      if (this.curSceneId === 'albergo') {
+        const door = this.scene.getObjectByName('Porta 404');
+        if (door) {
+          // Cambia l'etichetta o l'aspetto per mostrare che è sicuro
+          this.notify('La Stanza 404 nel futuro è ora agibile.');
+        }
+      }
+    }
+  }
+
+  setFlag(flag) {
+    this.flags[flag] = true;
+  }
+
+  notify(msg, sticky = false, onRender = null, extraHtml = '') {
+    const nt = document.getElementById('nt');
+    if (!nt) return;
+    nt.style.pointerEvents = 'auto'; // Consentiamo click sulla notifica
+    
+    if (sticky) {
+      nt.innerHTML = `<div style="display:flex;align-items:center;gap:12px;"><span style="flex:1;">${msg}</span>${extraHtml}<span id="close-nt-btn" style="cursor:pointer;color:#e74c3c;font-weight:bold;font-family:monospace;padding:2px 6px;border:1px solid #e74c3c;border-radius:3px;font-size:0.8rem;user-select:none;transition:background 0.2s;" onmouseover="this.style.background='rgba(231,76,60,0.15)'" onmouseout="this.style.background='none'">X</span></div>`;
+      nt.classList.add('show');
+      if (this.ntTimer) clearTimeout(this.ntTimer);
+      
+      const closeBtn = document.getElementById('close-nt-btn');
+      if (closeBtn) {
+        closeBtn.onclick = (e) => {
+          e.stopPropagation();
+          nt.classList.remove('show');
+        };
+      }
+      if (onRender) onRender();
+    } else {
+      nt.innerHTML = msg;
+      nt.classList.add('show');
+      if (this.ntTimer) clearTimeout(this.ntTimer);
+      this.ntTimer = setTimeout(() => nt.classList.remove('show'), 3000);
+    }
+  }
+
+  updateHealth(amount) {
+    this.health = Math.max(0, Math.min(100, this.health + amount));
+    const hb = document.getElementById('health-bar');
+    if (hb) hb.style.width = this.health + '%';
+    if (this.health <= 0 && this.state === 'PLAY') {
+      this.die();
+    }
+  }
+
+  die() {
+    this.state = 'DEAD';
+    this.audio.playTone(120, 'sawtooth', 1.6, 0.25);
+    
+    const ws = document.getElementById('ws');
+    const wt = document.getElementById('wt');
+    const wtx = document.getElementById('wtx');
+    const wco = document.querySelector('#ws .wco');
+    const nextBtn = document.getElementById('next-level-btn');
+    
+    const winImg = document.getElementById('win-img');
+    const winIcon = document.getElementById('win-icon');
+    if (winImg) winImg.style.display = 'none';
+    if (winIcon) winIcon.style.display = 'block';
+
+    if (ws) ws.classList.remove('hidden');
+    if (wt) wt.textContent = "SEI MORTO DI STENTI";
+    if (wtx) wtx.textContent = "La fame e la sete hanno avuto la meglio su di te. L'isola ha cancellato la tua presenza e la tua storia.";
+    if (wco) wco.innerHTML = "<span style='color:#e74c3c; font-weight:bold; letter-spacing: 2px;'>GAME OVER</span>";
+    if (nextBtn) nextBtn.classList.add('hidden');
+  }
+
+  win_level1() {
+    this.state = 'WIN';
+    this.audio.playWin();
+    
+    const wt = document.getElementById('wt');
+    const wtx = document.getElementById('wtx');
+    const wco = document.getElementById('wco');
+    const nextBtn = document.getElementById('next-level-btn');
+    
+    const winImg = document.getElementById('win-img');
+    const winIcon = document.getElementById('win-icon');
+
+    // Mostra immagine della zattera (Valentine sul mare)
+    if (winImg) {
+      winImg.src = 'assets/valentine_zattera.png';
+      winImg.style.display = 'block';
+      winImg.onerror = () => {
+        // Fallback: usa immagine precedente o icon
+        winImg.src = 'assets/transizione_livelli.png';
+        winImg.onerror = () => { winImg.style.display = 'none'; };
+      };
+    }
+    if (winIcon) winIcon.style.display = 'none';
+
+    if (wt) wt.textContent = "IL PORTO È ALLE SPALLE";
+    if (wtx) wtx.innerHTML = "Valentine spinge la zattera tra le acque oscure.<br>L'isola la attende dall'altra parte del mare.";
+    if (wco) wco.innerHTML = "♦ LIVELLO 2 ♦<br><span style='font-size:.85rem;font-style:italic;color:#6ab0cc;'>La Foresta degli Orologi</span>";
+    
+    if (nextBtn) {
+      nextBtn.classList.remove('hidden');
+      nextBtn.innerHTML = "🌿 LIVELLO 2 — AVANTI →";
+      nextBtn.style.background = '';
+      nextBtn.style.borderColor = '';
+    }
+    
+    document.getElementById('ws').classList.remove('hidden');
+    nextBtn.onclick = () => {
+      document.getElementById('ws').classList.add('hidden');
+      this.state = 'PLAY';
+      this.loadScene('foresta');
+    };
+  }
+
+  torna_livello1() {
+    this.state = 'WIN';
+    this.audio.playWin();
+    
+    const wt = document.getElementById('wt');
+    const wtx = document.getElementById('wtx');
+    const wco = document.getElementById('wco');
+    const nextBtn = document.getElementById('next-level-btn');
+    
+    const winImg = document.getElementById('win-img');
+    const winIcon = document.getElementById('win-icon');
+
+    // Mostra immagine della zattera (Valentine sul mare)
+    if (winImg) {
+      winImg.src = 'assets/valentine_zattera.png';
+      winImg.style.display = 'block';
+      winImg.onerror = () => {
+        winImg.src = 'assets/transizione_livelli.png';
+        winImg.onerror = () => { winImg.style.display = 'none'; };
+      };
+    }
+    if (winIcon) winIcon.style.display = 'none';
+
+    if (wt) wt.textContent = "RITORNO AL PORTO";
+    if (wtx) wtx.innerHTML = "Valentine spinge la zattera sulle onde per ritornare.<br>Ripercorre a ritroso le correnti verso il porto delle navi perdute.";
+    if (wco) wco.innerHTML = "♦ LIVELLO 1 ♦<br><span style='font-size:.85rem;font-style:italic;color:#6ab0cc;'>Il Porto delle Maree Morte</span>";
+    
+    if (nextBtn) {
+      nextBtn.classList.remove('hidden');
+      nextBtn.innerHTML = "⛵ TORNA AL PORTO";
+      nextBtn.style.background = 'linear-gradient(135deg,#1a4a6a,#2a7aaa)';
+      nextBtn.style.borderColor = '#3a8aaa';
+    }
+    
+    document.getElementById('ws').classList.remove('hidden');
+    nextBtn.onclick = () => {
+      nextBtn.style.background = '';
+      nextBtn.style.borderColor = '';
+      nextBtn.innerHTML = "🌿 LIVELLO 2 — AVANTI →";
+      document.getElementById('ws').classList.add('hidden');
+      this.state = 'PLAY';
+      this.loadScene('porto', -1.5, 1.5);
+      this.notify("⛵ Sei tornata al Porto delle Maree Morte.");
+    };
+  }
+
+  win_level2() {
+    this.state = 'WIN';
+    this.audio.playWin();
+    
+    const wt = document.getElementById('wt');
+    const wtx = document.getElementById('wtx');
+    const wco = document.querySelector('#ws .wco');
+    const nextBtn = document.getElementById('next-level-btn');
+    
+    const winImg = document.getElementById('win-img');
+    const winIcon = document.getElementById('win-icon');
+    if (winImg) winImg.style.display = 'none';
+    if (winIcon) winIcon.style.display = 'block';
+
+    if (wt) wt.textContent = "IL SENTIERO È LIBERO";
+    if (wtx) wtx.textContent = "Con le tue risposte hai convinto il Guardiano della Foresta di non averti mai visto. Ti lasci alle spalle il ticchettio incessante degli orologi.";
+    if (wco) wco.innerHTML = "&diams; LIVELLO 3 &diams;<br><span style='font-size:.9rem;font-style:italic'>L'Albergo delle Ombre</span>";
+    
+    if (nextBtn) {
+      nextBtn.classList.remove('hidden');
+      nextBtn.innerHTML = "🔑 LIVELLO 3 — AVANTI →";
+      nextBtn.style.background = '';
+      nextBtn.style.borderColor = '';
+    }
+    
+    document.getElementById('ws').classList.remove('hidden');
+    nextBtn.onclick = () => {
+      document.getElementById('ws').classList.add('hidden');
+      this.state = 'PLAY';
+      this.loadScene('albergo');
+    };
+  }
+
+  win_level3() {
+    this.state = 'WIN';
+    this.audio.playWin();
+    
+    const wt = document.getElementById('wt');
+    const wtx = document.getElementById('wtx');
+    const wco = document.querySelector('#ws .wco');
+    const nextBtn = document.getElementById('next-level-btn');
+    
+    const winImg = document.getElementById('win-img');
+    const winIcon = document.getElementById('win-icon');
+    if (winImg) winImg.style.display = 'none';
+    if (winIcon) winIcon.style.display = 'block';
+
+    if (wt) wt.textContent = "L'ILLUSIONE È SPEZZATA";
+    if (wtx) wtx.textContent = "Hai ripristinato l'immagine della Donna senza Riflesso sventando l'incendio del passato. L'ascensore ti porta verso il prossimo mistero.";
+    if (wco) wco.innerHTML = "&diams; LIVELLO 4 &diams;<br><span style='font-size:.9rem;font-style:italic'>La Miniera del Sole Nero</span>";
+    
+    if (nextBtn) {
+      nextBtn.classList.remove('hidden');
+      nextBtn.innerHTML = "⛏️ LIVELLO 4 — AVANTI →";
+      nextBtn.style.background = 'linear-gradient(135deg,#1a0a2e,#3a0a5e)';
+      nextBtn.style.borderColor = '#5a0a9e';
+    }
+    
+    document.getElementById('ws').classList.remove('hidden');
+    nextBtn.onclick = () => {
+      document.getElementById('ws').classList.add('hidden');
+      this.state = 'PLAY';
+      this.loadScene('minera', 0, 8);
+    };
+  }
+
+  win_level4() {
+    this.state = 'WIN';
+    this.audio.playWin();
+    
+    const wt = document.getElementById('wt');
+    const wtx = document.getElementById('wtx');
+    const wco = document.querySelector('#ws .wco');
+    const nextBtn = document.getElementById('next-level-btn');
+    
+    const winImg = document.getElementById('win-img');
+    const winIcon = document.getElementById('win-icon');
+    if (winImg) winImg.style.display = 'none';
+    if (winIcon) {
+      winIcon.style.display = 'block';
+      winIcon.textContent = '🌊';
+    }
+
+    if (wt) wt.textContent = "IL VELO SI SQUARCIA";
+    if (wtx) wtx.textContent = "Hai scoperto l'identità del Mercante senza Volto. Il suo nome è Obren, e nominar lo ha liberato. La miniera trema, il passaggio si apre. La superficie dell'oceano ti chiama.";
+    if (wco) wco.innerHTML = "&diams; LIVELLO 5 &diams;<br><span style='font-size:.9rem;font-style:italic'>La Città Sommersa</span>";
+    
+    if (nextBtn) {
+      nextBtn.classList.remove('hidden');
+      nextBtn.innerHTML = "🌊 LIVELLO 5 — LA CITTÀ SOMMERSA →";
+      nextBtn.style.background = 'linear-gradient(135deg,#051a3a,#0a3a6a)';
+      nextBtn.style.borderColor = '#1a6aaa';
+    }
+    
+    document.getElementById('ws').classList.remove('hidden');
+    nextBtn.onclick = () => {
+      document.getElementById('ws').classList.add('hidden');
+      this.state = 'PLAY';
+      this.loadScene('citta', 0, 10);
+    };
+  }
+
+  win_level5() {
+    this.state = 'WIN';
+    this.audio.playWin();
+    
+    const wt = document.getElementById('wt');
+    const wtx = document.getElementById('wtx');
+    const wco = document.querySelector('#ws .wco');
+    const nextBtn = document.getElementById('next-level-btn');
+    
+    const winImg = document.getElementById('win-img');
+    const winIcon = document.getElementById('win-icon');
+    if (winImg) winImg.style.display = 'none';
+    if (winIcon) {
+      winIcon.style.display = 'block';
+      winIcon.textContent = '✨';
+    }
+
+    if (wt) wt.textContent = "LA VERITÀ DELL'ISOLA";
+    if (wtx) wtx.textContent = "L'isola non è un luogo. È una macchina costruita da una civiltà dimenticata per conservare i ricordi dell'umanità. E tu hai appena pronunciato le parole che la svegliano dal sonno millenario. L'isola comincia a tremare. La memoria è il vero mare, e tutti noi stiamo affondando.";
+    if (wco) wco.innerHTML = "&diams; FINE DEL CAPITOLO I &diams;<br><span style='font-size:.95rem;font-weight:bold;color:#4acce0'>Isola Senza Nome — Il risveglio della macchina</span>";
+    if (nextBtn) nextBtn.classList.add('hidden');
+    
+    document.getElementById('ws').classList.remove('hidden');
+  }
+
+  loadScene(id, startX=0, startZ=2) {
+    this.curSceneId = id;
+    this.scene = new THREE.Scene();
+    
+    // Luci Ambientali
+    this.scene.add(new THREE.AmbientLight(0xffeedd, 0.5));
+    const dl = new THREE.DirectionalLight(0xffeedd, 1.2);
+    dl.position.set(5, 10, 5);
+    dl.castShadow = true;
+    dl.shadow.mapSize.set(1024, 1024);
+    this.scene.add(dl);
+    
+    this.player = new Player(this.scene);
+    this.player.grp.position.set(startX, 0, startZ);
+    // Assegna il nome reale del personaggio selezionato per l'editor
+    const selectedCharData = GAME_DATA.characters[this.charId];
+    this.player.grp.name = selectedCharData ? selectedCharData.name : 'Personaggio Principale';
+    
+    // Inizializza savedCamera con un offset predefinito rispetto al giocatore se non è già salvata
+    this.savedCamera = {
+      position: new THREE.Vector3(startX, 7, startZ + 9),
+      target: new THREE.Vector3(startX, 0, startZ)
+    };
+    
+    this.curScene = new this.scenes[id](this);
+    this.curScene.build();
+
+    // Registra collider statici e NPC dopo la costruzione della scena
+    this._registerSceneColliders();
+    
+    document.getElementById('sn').textContent = this.sceneNames[this.lang][id];
+    if (this.state === 'EDIT') {
+      this.scene.add(this.edControls);
+      this.loadEditorState(true);
+    }
+  }
+
+  /**
+   * Registra i collider AABB degli edifici e gli NPC della scena corrente nel player.
+   * Va chiamato subito dopo curScene.build().
+   */
+  _registerSceneColliders() {
+    if (!this.player) return;
+    const p = this.player;
+    p.staticColliders = [];
+    p.npcColliders = [];
+
+    if (this.curSceneId === 'porto') {
+      // Edificio principale  cx=-5.5  cz=-2  halfW=1.7  halfD=1.45
+      p.addStaticCollider(-5.5, -2,    1.7,  1.45);
+    } else if (this.curSceneId === 'foresta') {
+      // Orologio Maestro  cx=0  cz=10.2
+      p.addStaticCollider(0, 10.2, 0.7, 0.7);
+      // Barca di ritorno  cx=-2.5  cz=0.5
+      p.addStaticCollider(-2.5, 0.5, 0.6, 1.2);
+      // Cancello di rovi  cx=0  cz=12.8
+      if (this.curScene && !this.curScene.gateOpen) {
+        this.curScene.gateCollider = p.addStaticCollider(0, 12.8, 1.8, 0.3);
+      }
+      // Alberi foresta
+      if (this.curScene && this.curScene.treePositions) {
+        this.curScene.treePositions.forEach(t => {
+          p.addStaticCollider(t.x, t.z, 0.3, 0.3);
+        });
+      }
+    } else if (this.curSceneId === 'albergo') {
+      // Banco Reception  cx=5  cz=-5
+      p.addStaticCollider(5, -5, 1.6, 0.7);
+      // Pianoforte  cx=-6  cz=4
+      p.addStaticCollider(-6, 4, 1.2, 1.2);
+      // Muro Posteriore  cx=0  cz=-8
+      p.addStaticCollider(0, -8, 15.0, 0.3);
+      // Colonne
+      p.addStaticCollider(-8, -4, 0.3, 0.3);
+      p.addStaticCollider(-8, 2, 0.3, 0.3);
+      p.addStaticCollider(8, -4, 0.3, 0.3);
+      p.addStaticCollider(8, 2, 0.3, 0.3);
+    }
+
+    // Registra tutti gli NPC dalla scena corrente
+    if (this.curScene && this.curScene.npcs) {
+      this.curScene.npcs.forEach(npc => {
+        p.addNPCCollider(npc, 0.55);
+      });
+    }
+  }
+  
+  onClick() {
+    if (this.state === 'EDIT') {
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+      const hits = this.raycaster.intersectObjects(this.scene.children, true);
+      
+      const clickedGizmo = hits.find(hit => {
+        let o = hit.object;
+        while(o) {
+          if (o === this.edControls) return true;
+          o = o.parent;
+        }
+        return false;
+      });
+      if (clickedGizmo) return;
+
+      for (let hit of hits) {
+        let obj = hit.object;
+        let target = obj;
+        while (target.parent && target.parent !== this.scene) {
+          if (target.userData && target.userData.editorLi) {
+            break;
+          }
+          target = target.parent;
+        }
+        if (target === this.edControls || (target.parent && target.parent === this.edControls)) continue;
+
+        this.selectObject(target, target.userData.editorLi);
+        this.notify(`Selezionato: ${target.name || target.type}`);
+        return;
+      }
+      return;
+    }
+
+    if(this.state !== 'PLAY') return;
+    this.audio.ctx.resume();
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    
+    // Check objects
+    if (this.curScene && this.curScene.objs) {
+      const hits = this.raycaster.intersectObjects(this.curScene.objs.map(o => o.mesh), true);
+      if(hits.length > 0) {
+        const obj = this._getHitObj(hits[0].object);
+        if(obj) {
+          // Calcola il walkTarget: se l'oggetto è un NPC (ha userData.home), 
+          // usiamo la sua posizione attuale al momento del click + offset verso il giocatore
+          let walkTarget = obj.walkTarget;
+          const meshPos = obj.mesh.position;
+          let npcRef = null;
+          if (obj.mesh.userData && obj.mesh.userData.home) {
+            // È un NPC: calcoliamo il punto di arrivo a 0.75 unità dall'NPC,
+            // nella direzione del giocatore
+            npcRef = obj.mesh;
+            const px = this.player.grp.position.x;
+            const pz = this.player.grp.position.z;
+            const dx = px - meshPos.x;
+            const dz = pz - meshPos.z;
+            const dist = Math.sqrt(dx*dx + dz*dz);
+            if (dist > 0.75) {
+              walkTarget = {
+                x: meshPos.x + (dx / dist) * 0.75,
+                z: meshPos.z + (dz / dist) * 0.75
+              };
+            } else {
+              // già vicinissimo: azione immediata
+              obj.action();
+              return;
+            }
+          }
+
+          // Se già abbastanza vicino al target, azione immediata
+          const ppx = this.player.grp.position.x;
+          const ppz = this.player.grp.position.z;
+          const ddx = ppx - walkTarget.x;
+          const ddz = ppz - walkTarget.z;
+          if (Math.sqrt(ddx*ddx + ddz*ddz) < 0.8) {
+            obj.action();
+            return;
+          }
+
+          this.player.move(walkTarget.x, walkTarget.z);
+          this.pendingAction = { tgt: walkTarget, fn: obj.action, npcRef };
+          return;
+        }
+      }
+    }
+    // Rimossa la camminata sul pavimento tramite click
+  }
+
+  _getHitObj(hitObject) {
+    if(!this.curScene || !this.curScene.objs) return null;
+    return this.curScene.objs.find(o => {
+      let found = false;
+      o.mesh.traverse(child => { if(child === hitObject) found = true; });
+      return found;
+    });
+  }
+
+  updateHover() {
+    const lbl = document.getElementById('ca');
+    if(this.state !== 'PLAY' || !this.curScene) { lbl.style.opacity = 0; return; }
+    
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    const hits = this.raycaster.intersectObjects(this.curScene.objs.map(o => o.mesh), true);
+    
+    if(hits.length > 0) {
+      const obj = this._getHitObj(hits[0].object);
+      if(obj) {
+        lbl.textContent = obj.label;
+        lbl.style.opacity = 1;
+        document.body.style.cursor = 'pointer';
+        return;
+      }
+    }
+    
+    lbl.style.opacity = 0;
+    document.body.style.cursor = 'default';
+  }
+
+  initOrbitControls() {
+    this.orbitControls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+    this.orbitControls.enableDamping = true;
+    this.orbitControls.dampingFactor = 0.05;
+    this.orbitControls.enabled = false; // only active in EDIT mode
+  }
+
+  resetEnvironment() {
+    const currentId = this.curSceneId;
+    this.loadScene(currentId, 0);
+    this.notify('Ambiente resettato allo stato originale.');
+  }
+
+  async saveLevel() {
+    const levelData = {
+      objects: [],
+      camera: {
+        position: this.camera.position.toArray(),
+        target: this.orbitControls ? this.orbitControls.target.toArray() : [0,0,0]
+      }
+    };
+    this.scene.traverse(obj => {
+      if ((obj.isMesh || obj.isGroup) && obj.name && !['Cielo', 'Acqua', 'Terreno'].includes(obj.name)) {
+        levelData.objects.push({
+          name: obj.name,
+          position: obj.position.toArray(),
+          rotation: obj.rotation.toArray(),
+          scale: obj.scale.toArray()
+        });
+      }
+    });
+    const jsonStr = JSON.stringify(levelData, null, 2);
+    const defaultFilename = `isla_level_${this.curSceneId}.json`;
+
+    if (window.showDirectoryPicker) {
+      try {
+        const dirHandle = await window.showDirectoryPicker();
+        const fileHandle = await dirHandle.getFileHandle(defaultFilename, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(jsonStr);
+        await writable.close();
+        this.notify('Livello salvato con successo nella cartella selezionata!');
+        return;
+      } catch(e) {
+        if (e.name === 'AbortError') return;
+        console.error("DirectoryPicker failed, falling back...", e);
+      }
+    }
+
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: defaultFilename,
+          types: [{ description: 'JSON Livello', accept: { 'application/json': ['.json'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(jsonStr);
+        await writable.close();
+        this.notify('Livello salvato come JSON!');
+      } catch(e) {
+        if (e.name !== 'AbortError') {
+          console.error(e);
+          this.notify('Errore nel salvataggio del file.');
+        }
+      }
+    } else {
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = defaultFilename;
+      a.click();
+      URL.revokeObjectURL(url);
+      this.notify('Livello salvato come JSON.');
+    }
+  }
+
+  loadLevel(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        this.resetEnvironment();
+        data.objects.forEach(objData => {
+          const target = this.scene.getObjectByName(objData.name);
+          if (target) {
+            target.position.fromArray(objData.position);
+            target.rotation.fromArray(objData.rotation);
+            target.scale.fromArray(objData.scale);
+          }
+        });
+        if (data.camera && this.orbitControls) {
+          this.camera.position.fromArray(data.camera.position);
+          this.orbitControls.target.fromArray(data.camera.target);
+          this.orbitControls.update();
+          this.savedCamera = {
+            position: this.camera.position.clone(),
+            target: this.orbitControls.target.clone()
+          };
+        }
+        this.notify('Livello caricato dal file JSON.');
+      } catch (err) {
+        console.error(err);
+        this.notify('Errore nel caricamento del file JSON.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  triggerLoadLevel() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        this.loadLevel(file);
+      }
+    };
+    input.click();
+  }
+
+  saveCamera() {
+    this.savedCamera = {
+      position: this.camera.position.clone(),
+      target: this.orbitControls ? this.orbitControls.target.clone() : new THREE.Vector3()
+    };
+    this.notify('Posizione iniziale della camera salvata.');
+  }
+
+  updateCameraFollow() {
+    if (!this.savedCamera) return;
+    const playerPos = this.player.grp.position;
+    
+    // Calcoliamo la distanza e l'altezza a cui la camera deve trovarsi rispetto al giocatore
+    // usando la posizione originaria registrata in savedCamera.
+    const relativeCamPos = new THREE.Vector3(0, 7, 9); // Offset di default
+    if (this.savedCamera.position && this.savedCamera.target) {
+      relativeCamPos.subVectors(this.savedCamera.position, this.savedCamera.target);
+    }
+    
+    this.camera.position.copy(playerPos).add(relativeCamPos);
+    this.camera.lookAt(playerPos.x, playerPos.y + 1, playerPos.z);
+    
+    if (this.orbitControls) {
+      this.orbitControls.target.copy(playerPos);
+      if (this.state === 'EDIT') {
+        this.orbitControls.update();
+      }
+    }
+  }
+
+  initEditor() {
+    this.edControls = new THREE.TransformControls(this.camera, this.renderer.domElement);
+    this.edControls.addEventListener('change', () => this.updatePropUI());
+    window.addEventListener('keydown', e => {
+      if(e.ctrlKey && e.key.toLowerCase() === 'e') { e.preventDefault(); this.toggleEditor(); }
+      
+      // Focus su oggetto selezionato in modalità EDIT premendo la lettera F
+      if(this.state === 'EDIT' && e.key.toLowerCase() === 'f') {
+        if(this.edSelected) {
+          const obj = this.edSelected;
+          const worldPos = new THREE.Vector3();
+          obj.getWorldPosition(worldPos);
+
+          // Calcola il bounding box per spostare la telecamera a una distanza adatta
+          const box = new THREE.Box3().setFromObject(obj);
+          const size = box.getSize(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z);
+          const distance = maxDim * 2.5 || 4; // Distanza proporzionale alla dimensione
+
+          // Sposta la telecamera in diagonale rispetto all'oggetto
+          this.camera.position.set(
+            worldPos.x + distance * 0.7,
+            worldPos.y + distance * 0.7,
+            worldPos.z + distance * 0.7
+          );
+          
+          if(this.orbitControls) {
+            this.orbitControls.target.copy(worldPos);
+            this.orbitControls.update();
+          } else {
+            this.camera.lookAt(worldPos);
+          }
+          this.notify(`Focus su: ${obj.name || obj.type}`);
+        } else {
+          this.notify("Nessun oggetto selezionato per il focus!");
+        }
+      }
+    });
+
+    this.edControls.addEventListener('dragging-changed', (event) => {
+      if (this.orbitControls) {
+        this.orbitControls.enabled = !event.value;
+      }
+    });
+
+    const bind = (id, fn) => {
+      const el = document.getElementById(id);
+      if (el) el.onclick = fn;
+    };
+    bind('ed-btn-translate', (e) => { this.edControls.setMode('translate'); this._updateEdBtn(e.target); });
+    bind('ed-btn-rotate', (e) => { this.edControls.setMode('rotate'); this._updateEdBtn(e.target); });
+    bind('ed-btn-scale', (e) => { this.edControls.setMode('scale'); this._updateEdBtn(e.target); });
+    bind('ed-btn-close', () => this.toggleEditor());
+    bind('ed-btn-save', () => { this.saveEditorState(); this.saveLevel(); });
+    bind('ed-btn-load', () => this.triggerLoadLevel());
+    bind('ed-btn-camera', () => this.saveCamera());
+    bind('ed-btn-import-glb', () => {
+      const el = document.getElementById('ed-glb-import-file');
+      if (el) el.click();
+    });
+
+    const importFileInput = document.getElementById('ed-glb-import-file');
+    if (importFileInput) {
+      importFileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const contents = event.target.result;
+            const loader = new THREE.GLTFLoader();
+            loader.parse(contents, '', (gltf) => {
+              const model = gltf.scene;
+              const newObj = new THREE.Group();
+              const baseName = file.name.replace(/\.[^/.]+$/, "");
+              let nameIndex = 1;
+              let uniqueName = `${baseName}_${nameIndex}`;
+              while (this.scene.getObjectByName(uniqueName)) {
+                nameIndex++;
+                uniqueName = `${baseName}_${nameIndex}`;
+              }
+              newObj.name = uniqueName;
+              newObj.add(model);
+
+              if (this.player) {
+                newObj.position.copy(this.player.grp.position).add(new THREE.Vector3(0, 0.5, -2));
+              } else {
+                newObj.position.set(0, 0.5, 0);
+              }
+
+              this.scene.add(newObj);
+
+              newObj.userData.glbFile = file.name;
+              newObj.userData.glbData = contents;
+              newObj.userData.animations = gltf.animations.map(a => a.name);
+              newObj.userData.animMapping = { idle: '', walk: '' };
+              newObj.userData.mixer = new THREE.AnimationMixer(model);
+              newObj.userData.clips = {};
+              gltf.animations.forEach(clip => {
+                newObj.userData.clips[clip.name] = newObj.userData.mixer.clipAction(clip);
+              });
+
+              const idleClip = gltf.animations.find(c => c.name.toLowerCase().includes('idle'));
+              const walkClip = gltf.animations.find(c => c.name.toLowerCase().includes('walk') || c.name.toLowerCase().includes('run'));
+              if (idleClip) newObj.userData.animMapping.idle = idleClip.name;
+              if (walkClip) newObj.userData.animMapping.walk = walkClip.name;
+
+              this.refreshObjList();
+              this.selectObject(newObj, newObj.userData.editorLi);
+              this.notify(`Importato nuovo GLB: ${uniqueName}`);
+            }, (error) => {
+              this.notify("Errore nel caricamento del GLB");
+            });
+          };
+          reader.readAsArrayBuffer(file);
+        }
+      };
+    }
+
+    ['px','py','pz','rx','ry','rz','sx','sy','sz'].forEach(id => {
+      const el = document.getElementById('ed-' + id);
+      if (el) el.oninput = () => this.updateObjFromUI();
+    });
+
+    // GLB Loading handler
+    const fileInput = document.getElementById('ed-glb-file');
+    if (fileInput) {
+      fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file && this.edSelected) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const contents = event.target.result;
+            const loader = new THREE.GLTFLoader();
+            loader.parse(contents, '', (gltf) => {
+              // Rimuoviamo i vecchi figli mesh/group dell'oggetto selezionato per rimpiazzarlo col nuovo modello
+              const obj = this.edSelected;
+              
+              // Salva i vecchi metadati dell'oggetto
+              const name = obj.name;
+              const pos = obj.position.clone();
+              const rot = obj.rotation.clone();
+              const scl = obj.scale.clone();
+
+              // Rimuove mesh pre-esistenti
+              while(obj.children.length > 0){
+                obj.remove(obj.children[0]);
+              }
+
+              const model = gltf.scene;
+              obj.add(model);
+              
+              // Mappatura animazioni
+              obj.userData.glbFile = file.name;
+              obj.userData.glbData = contents; // Salvato come arrayBuffer per il livello json/localstorage
+              obj.userData.animations = gltf.animations.map(a => a.name);
+              obj.userData.animMapping = obj.userData.animMapping || { idle: '', walk: '' };
+              
+              // Configura Mixer Animazioni dell'oggetto per il gioco
+              obj.userData.mixer = new THREE.AnimationMixer(model);
+              obj.userData.clips = {};
+              gltf.animations.forEach(clip => {
+                obj.userData.clips[clip.name] = obj.userData.mixer.clipAction(clip);
+              });
+
+              // Rilevamento automatico animazioni con suffissi o nomi simili a _idle, _walk
+              const idleClip = gltf.animations.find(c => c.name.toLowerCase().includes('idle'));
+              const walkClip = gltf.animations.find(c => c.name.toLowerCase().includes('walk') || c.name.toLowerCase().includes('run'));
+              if (idleClip) obj.userData.animMapping.idle = idleClip.name;
+              if (walkClip) obj.userData.animMapping.walk = walkClip.name;
+
+              this.notify("Modello GLB caricato con successo!");
+              this.updatePropUI();
+            }, (error) => {
+              this.notify("Errore nel parsing del GLB");
+            });
+          };
+          reader.readAsArrayBuffer(file);
+        }
+      };
+    }
+
+    // Bind dropdown animazioni
+    const selIdle = document.getElementById('ed-anim-idle');
+    const selWalk = document.getElementById('ed-anim-walk');
+    if (selIdle && selWalk) {
+      selIdle.onchange = () => {
+        if (this.edSelected && this.edSelected.userData.animMapping) {
+          this.edSelected.userData.animMapping.idle = selIdle.value;
+          this.playObjectAnim(this.edSelected, selIdle.value);
+        }
+      };
+      selWalk.onchange = () => {
+        if (this.edSelected && this.edSelected.userData.animMapping) {
+          this.edSelected.userData.animMapping.walk = selWalk.value;
+          this.playObjectAnim(this.edSelected, selWalk.value);
+        }
+      };
+    }
+  }
+
+  playObjectAnim(obj, animName) {
+    if (obj.userData.mixer && obj.userData.clips) {
+      // Ferma tutte le clip prima di avviare la nuova
+      Object.values(obj.userData.clips).forEach(action => action.stop());
+      const next = obj.userData.clips[animName];
+      if (next) {
+        next.reset().play();
+      }
+    }
+  }
+
+  _updateEdBtn(btn) {
+    document.querySelectorAll('#editor-topbar button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  toggleEditor() {
+    const ui = document.getElementById('editor-ui');
+    if (this.state === 'EDIT') {
+      this.state = this.prevState || 'PLAY';
+      ui.classList.add('hidden');
+      this.scene.remove(this.edControls);
+      this.edControls.detach();
+      if (this.orbitControls) {
+        this.orbitControls.enabled = false;
+      }
+      if (this.savedPlayCameraPosition && this.savedPlayCameraRotation) {
+        this.camera.position.copy(this.savedPlayCameraPosition);
+        this.camera.rotation.copy(this.savedPlayCameraRotation);
+      }
+    } else {
+      this.prevState = this.state;
+      this.state = 'EDIT';
+      ui.classList.remove('hidden');
+      this.scene.add(this.edControls);
+      this.refreshObjList();
+      
+      this.savedPlayCameraPosition = this.camera.position.clone();
+      this.savedPlayCameraRotation = this.camera.rotation.clone();
+      
+      if (this.orbitControls) {
+        this.orbitControls.enabled = true;
+        if (this.player) {
+          this.orbitControls.target.copy(this.player.grp.position);
+        } else {
+          this.orbitControls.target.set(0, 0, 0);
+        }
+        this.orbitControls.update();
+      }
+    }
+  }
+
+  refreshObjList() {
+    const list = document.getElementById('editor-obj-list');
+    list.innerHTML = '';
+
+    // Mappa mesh -> label leggibile dagli oggetti cliccabili della scena corrente
+    const labelMap = new Map();
+    if (this.curScene && this.curScene.objs) {
+      this.curScene.objs.forEach(o => {
+        if (o.mesh) labelMap.set(o.mesh.uuid, o.label || o.mesh.name || o.mesh.type);
+      });
+    }
+
+    const typeLabels = {
+      'AmbientLight': '💡 Luce Ambiente',
+      'DirectionalLight': '☀️ Luce Direzionale',
+      'PointLight': '🔆 Luce Puntuale',
+      'Mesh': '📦 Oggetto',
+      'Group': '👥 Gruppo',
+      'Scene': '🌍 Scena',
+    };
+
+    let idx = 0;
+    const addObj = (obj, depth = 0) => {
+      if (obj === this.edControls) return;
+      if (obj.type.includes('Helper')) return;
+
+      // Determina nome leggibile
+      let label = labelMap.get(obj.uuid);
+      if (!label) {
+        if (obj.name && obj.name.trim()) {
+          label = obj.name;
+        } else {
+          label = typeLabels[obj.type] || obj.type;
+        }
+      }
+      // Aggiungi suffisso indice per distinguere oggetti multipli dello stesso tipo
+      label = `${label}`;
+
+      const li = document.createElement('li');
+      li.style.paddingLeft = (depth * 15 + 10) + 'px';
+      li.style.display = 'flex';
+      li.style.alignItems = 'center';
+      li.style.gap = '6px';
+
+      // Icona colore per tipo
+      const dot = document.createElement('span');
+      dot.style.cssText = 'width:8px;height:8px;border-radius:50%;flex-shrink:0;';
+      if (obj.type.includes('Light')) dot.style.background = '#f1c40f';
+      else if (obj.type === 'Group') dot.style.background = '#9b59b6';
+      else dot.style.background = '#3498db';
+      li.appendChild(dot);
+
+      const txt = document.createElement('span');
+      txt.textContent = label;
+      txt.style.overflow = 'hidden';
+      txt.style.textOverflow = 'ellipsis';
+      txt.style.whiteSpace = 'nowrap';
+      li.appendChild(txt);
+
+      li.onclick = () => this.selectObject(obj, li);
+      obj.userData.editorLi = li;
+      list.appendChild(li);
+      if (depth < 1 && obj.children) obj.children.forEach(c => addObj(c, depth + 1));
+      idx++;
+    };
+    this.scene.children.forEach(c => addObj(c));
+  }
+
+  selectObject(obj, li) {
+    document.querySelectorAll('#editor-obj-list li').forEach(l => l.classList.remove('selected'));
+    if(li) li.classList.add('selected');
+    this.edSelected = obj;
+    this.edControls.attach(obj);
+    
+    const propTitle = document.getElementById('editor-prop-title');
+    if (propTitle) {
+      propTitle.textContent = obj ? `Proprietà: ${obj.name || obj.type}` : 'Properties';
+    }
+    
+    this.updatePropUI();
+  }
+
+  updatePropUI() {
+    const obj = this.edSelected;
+    if(!obj) return;
+    const set = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    };
+    set('ed-px', obj.position.x.toFixed(2));
+    set('ed-py', obj.position.y.toFixed(2));
+    set('ed-pz', obj.position.z.toFixed(2));
+    set('ed-rx', THREE.MathUtils.radToDeg(obj.rotation.x).toFixed(0));
+    set('ed-ry', THREE.MathUtils.radToDeg(obj.rotation.y).toFixed(0));
+    set('ed-rz', THREE.MathUtils.radToDeg(obj.rotation.z).toFixed(0));
+    set('ed-sx', obj.scale.x.toFixed(2));
+    set('ed-sy', obj.scale.y.toFixed(2));
+    set('ed-sz', obj.scale.z.toFixed(2));
+
+    // Gestione UI GLB e Animazioni
+    const pathLabel = document.getElementById('ed-glb-path');
+    const animsGroup = document.getElementById('ed-anims-group');
+    const animsList = document.getElementById('ed-anims-list');
+    const selIdle = document.getElementById('ed-anim-idle');
+    const selWalk = document.getElementById('ed-anim-walk');
+
+    if (obj.userData.glbFile) {
+      if (pathLabel) pathLabel.textContent = obj.userData.glbFile;
+      if (animsGroup) animsGroup.style.display = 'block';
+      
+      // Carica lista animazioni
+      if (animsList) {
+        animsList.innerHTML = obj.userData.animations && obj.userData.animations.length > 0 
+          ? obj.userData.animations.map(a => `<div>🎬 ${a}</div>`).join('')
+          : '<div style="color:#888;">Nessuna animazione nel GLB</div>';
+      }
+
+      // Popola select
+      if (selIdle && selWalk && obj.userData.animations) {
+        const optionsHtml = ['<option value="">-- Seleziona --</option>']
+          .concat(obj.userData.animations.map(a => `<option value="${a}">${a}</option>`))
+          .join('');
+        
+        selIdle.innerHTML = optionsHtml;
+        selWalk.innerHTML = optionsHtml;
+
+        if (obj.userData.animMapping) {
+          selIdle.value = obj.userData.animMapping.idle || '';
+          selWalk.value = obj.userData.animMapping.walk || '';
+        }
+      }
+    } else {
+      if (pathLabel) pathLabel.textContent = 'Nessun modello personalizzato';
+      if (animsGroup) animsGroup.style.display = 'none';
+    }
+  }
+
+  updateObjFromUI() {
+    const obj = this.edSelected;
+    if(!obj) return;
+    const get = (id) => parseFloat(document.getElementById(id).value);
+    obj.position.set(get('ed-px'), get('ed-py'), get('ed-pz'));
+    obj.rotation.set(THREE.MathUtils.degToRad(get('ed-rx')), THREE.MathUtils.degToRad(get('ed-ry')), THREE.MathUtils.radToDeg(get('ed-rz')));
+    obj.scale.set(get('ed-sx'), get('ed-sy'), get('ed-sz'));
+  }
+
+
+  saveEditorState() {
+    const wasInScene = this.edControls && this.edControls.parent;
+    if (wasInScene) this.scene.remove(this.edControls);
+
+    // Usa il nome dell'oggetto come chiave — robusto rispetto all'ordine degli oggetti nella scena
+    const states = {};
+    this.scene.traverse(obj => {
+      if (!obj.name || obj.name.trim() === '') return;          // salta oggetti senza nome
+      if (obj === this.edControls) return;                      // salta il gizmo
+      if (obj.type.includes('Helper') || obj.type.includes('Light')) return;
+      // Salta il personaggio giocante: non vogliamo spostarlo via editor
+      if (this.player && (obj === this.player.grp || obj === this.player.model)) return;
+
+      states[obj.name] = {
+        p: obj.position.toArray(),
+        r: obj.rotation.toArray(),
+        s: obj.scale.toArray(),
+        glbUrl: obj.userData.glbUrl || null,
+        glbFile: obj.userData.glbFile || null,
+        animMapping: obj.userData.animMapping || null
+      };
+    });
+
+    if (wasInScene) this.scene.add(this.edControls);
+
+    localStorage.setItem(`isla_level_editor_${this.curSceneId}`, JSON.stringify(states));
+    this.notify("Stato editor salvato in LocalStorage!");
+  }
+
+  loadEditorState(silent = false) {
+    const s = localStorage.getItem(`isla_level_editor_${this.curSceneId}`);
+    if (!s) {
+      if (!silent) this.notify("Nessun salvataggio editor trovato!");
+      return;
+    }
+    try {
+      const states = JSON.parse(s);
+      const wasInScene = this.edControls && this.edControls.parent;
+      if (wasInScene) this.scene.remove(this.edControls);
+
+      this.scene.traverse(obj => {
+        if (!obj.name || obj.name.trim() === '') return;        // salta oggetti senza nome
+        if (obj === this.edControls) return;
+        // Proteggi il player: non sovrascrivere mai la sua posizione
+        if (this.player && (obj === this.player.grp || obj === this.player.model)) return;
+
+        const stateObj = states[obj.name];
+        if (!stateObj) return;
+
+        obj.position.fromArray(stateObj.p);
+        obj.rotation.fromArray(stateObj.r);
+        obj.scale.fromArray(stateObj.s);
+
+        // Ricarica GLB da assets/ se l'URL è disponibile
+        if (stateObj.glbUrl) {
+          obj.userData.glbUrl = stateObj.glbUrl;
+          obj.userData.glbFile = stateObj.glbFile;
+          obj.userData.animMapping = stateObj.animMapping;
+          const loader = new THREE.GLTFLoader();
+          const capturedObj = obj;
+          const capturedMapping = stateObj.animMapping;
+          loader.load(stateObj.glbUrl, (gltf) => {
+            this._applyGLBToObject(gltf, capturedObj, stateObj.glbUrl);
+            // Ripristina le mappature salvate sopra quelle auto-detect
+            if (capturedMapping) capturedObj.userData.animMapping = capturedMapping;
+          }, undefined, (err) => {
+            console.warn('[loadEditorState] GLB non trovato:', stateObj.glbUrl, err);
+          });
+        } else if (stateObj.glbFile) {
+          obj.userData.glbFile = stateObj.glbFile;
+          obj.userData.animMapping = stateObj.animMapping;
+        }
+      });
+
+      if (wasInScene) this.scene.add(this.edControls);
+      if (!silent) this.notify("Stato editor caricato con successo!");
+      this.updatePropUI();
+    } catch(e) {
+      console.error('[loadEditorState]', e);
+      if (!silent) this.notify("Errore nel caricamento dello stato editor!");
+    }
+  }
+
+  async saveGame() {
+    const data = { memory: this.memory, health: this.health, charId: this.charId, flags: this.flags, items: this.inv.items, curSceneId: this.curSceneId };
+    const jsonStr = JSON.stringify(data, null, 2);
+
+    if (window.showDirectoryPicker) {
+      try {
+        const dirHandle = await window.showDirectoryPicker();
+        const fileHandle = await dirHandle.getFileHandle('isla_perduta_save.json', { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(jsonStr);
+        await writable.close();
+        this.notify("Partita salvata con successo nella cartella selezionata!");
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        console.error("DirectoryPicker failed, falling back...", err);
+      }
+    }
+
+    if (window.showSaveFilePicker) {
+      try {
+        const options = {
+          suggestedName: 'isla_perduta_save.json',
+          types: [{
+            description: 'Salvataggio Isla Perduta',
+            accept: {
+              'application/json': ['.json'],
+            },
+          }],
+        };
+        const handle = await window.showSaveFilePicker(options);
+        const writable = await handle.createWritable();
+        await writable.write(jsonStr);
+        await writable.close();
+        this.notify("Partita salvata con successo!");
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error(err);
+          this.notify("Errore nel salvataggio del file.");
+        }
+      }
+    } else {
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const filename = prompt("Inserisci il nome per il file di salvataggio:", "isla_perduta_save.json");
+      if (filename) {
+        a.download = filename.endsWith('.json') ? filename : filename + '.json';
+        a.click();
+        this.notify("Partita salvata (download avviato)!");
+      }
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  loadGame() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const d = JSON.parse(event.target.result);
+            if (d.charId !== undefined) {
+              this.memory = d.memory !== undefined ? d.memory : 100;
+              this.health = d.health !== undefined ? d.health : 100;
+              this.charId = d.charId;
+              this.flags = d.flags || {};
+              this.inv.items = d.items || Array(12).fill(null);
+              this.inv.render();
+              this.selectChar(this.charId);
+              this.curSceneId = d.curSceneId || 'porto';
+              this.startGame();
+              this.updateHealth(0); // Aggiorna barra salute
+              this.notify("Partita Caricata dal file!");
+            } else {
+              this.notify("File di salvataggio non valido.");
+            }
+          } catch (err) {
+            console.error(err);
+            this.notify("Errore nel caricamento del file.");
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  }
+
+  openMap() {
+    this.openImageOverlay('assets/Mappa_totale.png');
+  }
+
+  openImageOverlay(src) {
+    this.prevState = this.state;
+    this.state = 'MAP';
+    const mapImg = document.getElementById('map-img');
+    if (mapImg) {
+      mapImg.src = src;
+    }
+    const overlay = document.getElementById('map-overlay');
+    if (overlay) {
+      overlay.classList.remove('hidden');
+    }
+    this.audio.playClick();
+  }
+
+  closeMap() {
+    this.state = this.prevState || 'PLAY';
+    const overlay = document.getElementById('map-overlay');
+    if (overlay) {
+      overlay.classList.add('hidden');
+    }
+    this.audio.playClick();
+  }
+
+  loop() {
+    requestAnimationFrame(() => this.loop());
+    const dt = Math.min(0.1, this.clock.getDelta());
+    if(this.state === 'PLAY' || this.state === 'DIALOG' || this.state === 'EDIT') {
+      if(this.player && this.state === 'PLAY') {
+        this.player.update(dt, this.keys);
+        this.updateHealth(-0.15 * dt); // depletes 1 point every ~6.6 seconds (approx 11 minutes total)
+        if(this.pendingAction) {
+          // Se è un'azione verso un NPC, aggiorna il target in tempo reale (l'NPC si muove)
+          if (this.pendingAction.npcRef) {
+            const npc = this.pendingAction.npcRef;
+            const px2 = this.player.grp.position.x;
+            const pz2 = this.player.grp.position.z;
+            const dx2 = px2 - npc.position.x;
+            const dz2 = pz2 - npc.position.z;
+            const d2 = Math.sqrt(dx2*dx2 + dz2*dz2);
+            if (d2 > 0.75) {
+              const newTgt = {
+                x: npc.position.x + (dx2 / d2) * 0.75,
+                z: npc.position.z + (dz2 / d2) * 0.75
+              };
+              this.pendingAction.tgt = newTgt;
+              this.player.target.set(newTgt.x, 0, newTgt.z);
+            }
+          }
+          // Confronto solo su XZ — il personaggio può essere su superfici rialzate
+          const px = this.player.grp.position.x;
+          const pz = this.player.grp.position.z;
+          const dx = px - this.pendingAction.tgt.x;
+          const dz = pz - this.pendingAction.tgt.z;
+          if(Math.sqrt(dx*dx + dz*dz) < 0.8) { this.pendingAction.fn(); this.pendingAction = null; }
+        }
+        this.updateHover();
+        this.updateCameraFollow();
+      }
+      if(this.curScene && this.curScene.update && this.state === 'PLAY') this.curScene.update(dt);
+
+      // Aggiorna mixer animazioni per tutti gli oggetti che ne hanno uno caricato
+      if (this.scene) {
+        this.scene.traverse(obj => {
+          if (obj.userData && obj.userData.mixer) {
+            // Se in gioco ed ha una mappatura, riproduci l'animazione corretta basata sullo stato di movimento dell'NPC / Oggetto
+            if (this.state === 'PLAY') {
+              if (obj.userData.animMapping) {
+                const moving = obj.userData.isMoving;
+                const targetAnim = moving ? obj.userData.animMapping.walk : obj.userData.animMapping.idle;
+                if (targetAnim) {
+                  // Avvia solo se non è già attiva
+                  const action = obj.userData.clips[targetAnim];
+                  if (action && !action.isRunning()) {
+                    this.playObjectAnim(obj, targetAnim);
+                  }
+                }
+              }
+              obj.userData.mixer.update(dt);
+            }
+          }
+        });
+      }
+
+      if(this.state === 'EDIT' && this.orbitControls && this.orbitControls.enabled) {
+        this.orbitControls.update();
+      }
+    }
+    if(this.scene) this.renderer.render(this.scene, this.camera);
+  }
+}
+  
+
+/* ── BOOTSTRAP ── */
+let game;
+
+window.showCharSelect = () => { if(game) game.showCharSelect(); };
+window.selectChar = (id) => { if(game) game.selectChar(id); };
+window.startGame = () => { if(game) game.startGame(); };
+
+window.menuNewGame = () => {
+  if (game) {
+    document.getElementById('game-menu').classList.add('hidden');
+    game.showIntro();
+  }
+};
+window.confirmStartGame = () => {
+  document.getElementById('intro-screen').classList.add('hidden');
+  if (game) game.startGame();
+};
+window.menuQuestMap = () => {
+  if (game) {
+    if (!game.charId) {
+      game.notify("Scegli prima un personaggio!");
+      return;
+    }
+    document.getElementById('game-menu').classList.add('hidden');
+    document.getElementById('hud').classList.remove('hidden');
+    document.getElementById('hud-btns').classList.remove('hidden');
+    document.getElementById('iv').classList.remove('hidden');
+    
+    // Mostra il tasto EXIT per tornare al menu dal livello Quest
+    const exitBtn = document.getElementById('exit-quest-btn');
+    if (exitBtn) exitBtn.style.display = 'inline-block';
+    
+    // Pulisci inventario per il tutorial e avvia
+    game.inv.items = Array(12).fill(null);
+    game.inv.render();
+    game.state = 'PLAY';
+    game.loadScene('quest');
+  }
+};
+window.menuInventory = () => {
+  if (game) {
+    game.notify("Zaino vuoto. Clicca su NEW GAME o QUEST MAP per iniziare!");
+  }
+};
+window.menuExit = () => {
+  location.reload();
+};
+window.menuBackToChars = () => {
+  document.getElementById('game-menu').classList.add('hidden');
+  document.getElementById('char-select').classList.remove('hidden');
+};
+window.exitQuestLevel = () => {
+  if (game) {
+    // Nasconde il tasto EXIT (solo per il livello quest)
+    const exitBtn = document.getElementById('exit-quest-btn');
+    if (exitBtn) exitBtn.style.display = 'none';
+    
+    // Nascondi HUD e zaino, torna a mostrare Menu_01.png
+    document.getElementById('hud').classList.add('hidden');
+    document.getElementById('hud-btns').classList.add('hidden');
+    document.getElementById('iv').classList.add('hidden');
+    document.getElementById('game-menu').classList.remove('hidden');
+    game.state = 'LOAD';
+    // Rimuove scene Three.js corrente
+    if (game.scene) {
+      THREE.Cache.clear();
+      game.scene.clear();
+    }
+  }
+};
+
+// BOOTSTRAP FINALE
+function bootstrap() {
+  const bar = document.getElementById('lf');
+  const label = document.getElementById('ll');
+  let p = 0;
+  
+  // Funzione per aggiornare la UI di caricamento
+  const updateUI = (val) => {
+    p = Math.max(p, val);
+    if(bar) bar.style.width = Math.min(p, 100) + '%';
+    if(label) label.textContent = 'Caricamento: ' + Math.floor(p) + '%';
+  };
+
+  // ── Pulizia dati editor obsoleti (vecchio formato indice-based) ──
+  const EDITOR_VER = 'v2_named';
+  if (localStorage.getItem('isla_editor_version') !== EDITOR_VER) {
+    // Rimuove tutti i vecchi salvataggi editor che usavano indici numerici
+    ['porto', 'foresta'].forEach(id => {
+      localStorage.removeItem(`isla_level_editor_${id}`);
+    });
+    localStorage.setItem('isla_editor_version', EDITOR_VER);
+    console.log('[Bootstrap] Cache editor resettata al formato v2 (chiavi per nome).');
+  }
+
+  // Feedback immediato
+  updateUI(5);
+
+  const int = setInterval(() => {
+    if (p < 90) updateUI(p + Math.random() * 5);
+    
+    if(p >= 100) {
+      clearInterval(int);
+      setTimeout(() => {
+        const ls = document.getElementById('ls');
+        const ts = document.getElementById('ts');
+        if(ls) ls.classList.add('hidden');
+        if(ts) ts.classList.remove('hidden');
+      }, 500);
+    }
+  }, 150);
+
+  // Controllo Three.js e inizializzazione
+  const check = setInterval(() => {
+    if(window.THREE) {
+      clearInterval(check);
+      try {
+        updateUI(50);
+        game = new Game();
+        updateUI(100); 
+      } catch(e) {
+        console.error("Init Error:", e);
+        if(label) label.innerHTML = '<span style="color:#ff6666">Errore Init: ' + e.message + '</span>';
+        p = 100; // Forza fine caricamento per mostrare l'errore
+      }
+    }
+  }, 200);
+
+  // Fallback se Three.js non carica dopo 5 secondi
+  setTimeout(() => {
+    if(!window.THREE && label) {
+      label.innerHTML = '<span style="color:#ff6666">Errore: Three.js non disponibile</span>';
+    }
+  }, 5000);
+
+  // Eventi UI
+  const bind = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
+  bind('sb', () => { if(game) game.saveGame(); });
+  bind('lb', () => { if(game) game.loadGame(); });
+  bind('mb', (e) => { if(game) { const m = game.audio.toggle(); e.target.textContent = m ? '🔇' : '🔊'; } });
+  bind('restart-btn', () => location.reload());
+}
+
+bootstrap();
+
+</script>
+</body>
+</html>

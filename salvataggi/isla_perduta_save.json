@@ -1,0 +1,23 @@
+{
+  "memory": 100,
+  "health": 42.96851000000045,
+  "charId": "valentine",
+  "flags": {
+    "amo_consegnato": true
+  },
+  "items": [
+    "mappa_bagnata",
+    "pendolo_spezzato",
+    "orologio_senza_lancette",
+    "fischietto_osso",
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "curSceneId": "foresta"
+}
