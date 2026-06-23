@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
@@ -406,7 +406,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   <div id="ts" class="hidden">
     <div class="tbo"></div>
     <div class="tc">
-      <img id="title-img" src="assets/Title.png" alt="Isola Perdida Title" style="max-width:80%;height:auto;margin-bottom:1rem;">
+      <img id="title-img" src="assets/Title.webp" alt="Isola Perdida Title" style="max-width:80%;height:auto;margin-bottom:1rem;">
       <div class="tsk" style="font-size:1.8rem;letter-spacing:0.3em;color:#4a7a9a;margin-bottom:.8rem">&#x2666; &#x2605; &#x2666;</div>
       <h1 class="tm">ISLA PERDIDA</h1>
       <h2 class="ts2">Un'isola che dimentica.<br><em style="font-size:.85em;color:#6a8a9a">E anche tu dimenticherai.</em></h2>
@@ -421,12 +421,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
     <div class="cs-sub">La tua identit&agrave; &egrave; la prima cosa che l'isola prover&agrave; a cancellare.</div>
     <div class="cs-cards">
       <div class="cs-card" id="card-elias" onclick="selectChar('elias')">
-        <img class="cs-avatar" src="assets/Foto_Elias.jpg" alt="Elias Crow" style="width:48px;height:48px;object-fit:cover;border-radius:50%;margin-bottom:0.5rem;"/>
+        <img class="cs-avatar" src="assets/Foto_Elias.webp" alt="Elias Crow" style="width:48px;height:48px;object-fit:cover;border-radius:50%;margin-bottom:0.5rem;"/>
         <div class="cs-name">Elias Crow</div>
         <div class="cs-desc">&ldquo;Un audace pirata avventuriero alla ricerca di risposte<br>e leggendari tesori perduti.&rdquo;</div>
       </div>
       <div class="cs-card" id="card-valentine" onclick="selectChar('valentine')">
-          <img class="cs-avatar" src="assets/Foto_Valentine.jpg" alt="Valentine Black" style="width:48px;height:48px;object-fit:cover;border-radius:50%;margin-bottom:0.5rem;"/>
+          <img class="cs-avatar" src="assets/Foto_Valentine.webp" alt="Valentine Black" style="width:48px;height:48px;object-fit:cover;border-radius:50%;margin-bottom:0.5rem;"/>
           <div class="cs-name">Valentine Black</div>
           <div class="cs-desc">&ldquo;Una coraggiosa pirata esploratrice guidata<br/>da una misteriosa mappa stellare.&rdquo;</div>
         </div>
@@ -435,8 +435,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   </div>
   
   <!-- MENU PRINCIPALE GIOCO (con sfondo Menu_01.png ed hotspot interattivi) -->
-  <div id="game-menu" class="hidden" style="position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:165; background: linear-gradient(rgba(10, 30, 46, 0.45), rgba(3, 8, 16, 0.75)), url('assets/Title.png?v=2') no-repeat center center; background-size: cover;">
-    <div style="position:relative; width:min(90vw, 420px); aspect-ratio: 3/4; background: url('assets/Menu_01.png?v=2') no-repeat center center; background-size: contain; border-radius: 15px; overflow:hidden;">
+  <div id="game-menu" class="hidden" style="position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:165; background: linear-gradient(rgba(10, 30, 46, 0.45), rgba(3, 8, 16, 0.75)), url('assets/Title.webp?v=2') no-repeat center center; background-size: cover;">
+    <div style="position:relative; width:min(90vw, 420px); aspect-ratio: 3/4; background: url('assets/Menu_01.webp?v=2') no-repeat center center; background-size: contain; border-radius: 15px; overflow:hidden;">
       
       <!-- NEW GAME option overlay -->
       <div class="menu-hotspot" onclick="menuNewGame()" style="position:absolute; left:4%; top:21%; width:92%; height:14%; cursor:pointer; border-radius:10px; transition: background 0.3s; box-shadow: inset 0 0 0px rgba(240,192,64,0);" onmouseover="this.style.background='rgba(255,255,255,0.08)'; this.style.boxShadow='inset 0 0 10px rgba(240,192,64,0.3)';" onmouseout="this.style.background='none'; this.style.boxShadow='none';"></div>
@@ -541,14 +541,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   <!-- MAP OVERLAY -->
   <div id="map-overlay" class="hidden">
     <div class="map-container">
-      <img id="map-img" src="assets/Mappa_totale.png" alt="Mappa Totale">
+      <img id="map-img" src="assets/Mappa_totale.webp" alt="Mappa Totale">
       <button id="close-map-btn">X</button>
     </div>
   </div>
 
   <!-- INTRO INTRODUTTIVA STORIA (foglio pergamena con Title.png come sfondo) -->
-  <div id="intro-screen" class="hidden" style="position:fixed; inset:0; z-index:190; display:flex; align-items:center; justify-content:center; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('assets/Title.png?v=2') no-repeat center center; background-size: cover; padding: 20px;">
-    <div style="position:relative; width:min(90vw, 90vh, 640px); aspect-ratio: 1/1; background: url('assets/pergamena_bruciata.png?v=2') no-repeat center center; background-size: 100% 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.85); padding: 5.5rem 5.2rem 4.5rem; display:flex; flex-direction:column; align-items:center; color: #000000; box-sizing: border-box; text-align:center; justify-content:space-between;">
+  <div id="intro-screen" class="hidden" style="position:fixed; inset:0; z-index:190; display:flex; align-items:center; justify-content:center; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('assets/Title.webp?v=2') no-repeat center center; background-size: cover; padding: 20px;">
+    <div style="position:relative; width:min(90vw, 90vh, 640px); aspect-ratio: 1/1; background: url('assets/pergamena_bruciata.webp?v=2') no-repeat center center; background-size: 100% 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.85); padding: 5.5rem 5.2rem 4.5rem; display:flex; flex-direction:column; align-items:center; color: #000000; box-sizing: border-box; text-align:center; justify-content:space-between;">
       
       <!-- Titolo statico in alto -->
       <div style="width: 100%;">
@@ -907,7 +907,7 @@ class Inventory {
           if (id === 'mappa_bagnata') {
             this.g.openMap();
           } else if (id === 'diario_incompleto') {
-            this.g.openImageOverlay('assets/pagina_diario.png');
+            this.g.openImageOverlay('assets/pagina_diario.webp');
           } else {
             const isProvvista = (id === 'pesce_essiccato' || id === 'acqua_dolce' || id === 'mango_fluorescente');
             const itemDef = (GAME_DATA && GAME_DATA.items[id]) || { emoji: '?', name: id };
@@ -1571,11 +1571,11 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
 
     // Mostra immagine della zattera (Valentine sul mare)
     if (winImg) {
-      winImg.src = 'assets/valentine_zattera.png';
+      winImg.src = 'assets/valentine_zattera.webp';
       winImg.style.display = 'block';
       winImg.onerror = () => {
         // Fallback: usa immagine precedente o icon
-        winImg.src = 'assets/transizione_livelli.png';
+        winImg.src = 'assets/transizione_livelli.webp';
         winImg.onerror = () => { winImg.style.display = 'none'; };
       };
     }
@@ -1614,10 +1614,10 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
 
     // Mostra immagine della zattera (Valentine sul mare)
     if (winImg) {
-      winImg.src = 'assets/valentine_zattera.png';
+      winImg.src = 'assets/valentine_zattera.webp';
       winImg.style.display = 'block';
       winImg.onerror = () => {
-        winImg.src = 'assets/transizione_livelli.png';
+        winImg.src = 'assets/transizione_livelli.webp';
         winImg.onerror = () => { winImg.style.display = 'none'; };
       };
     }
@@ -2706,7 +2706,7 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
   }
 
   openMap() {
-    this.openImageOverlay('assets/Mappa_totale.png');
+    this.openImageOverlay('assets/Mappa_totale.webp');
   }
 
   openImageOverlay(src) {
