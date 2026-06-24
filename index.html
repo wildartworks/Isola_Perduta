@@ -374,9 +374,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 
 /* ══════════════════════════════════════════════════
    MOBILE LANDSCAPE (telefono ruotato orizzontalmente)
-   max-height:500px cattura i phone in landscape
+   Cattura tutti i telefoni, inclusi i Pro Max più larghi
    ══════════════════════════════════════════════════ */
-@media (max-width:900px) and (orientation:landscape) and (max-height:500px) {
+@media (max-width:950px) and (orientation:landscape), (max-height:550px) and (orientation:landscape) {
 
   /* Canvas: usa tutto tranne la strip laterale destra */
   #cv{width:calc(100% - 190px)!important; height:100%!important}
@@ -1597,8 +1597,8 @@ class Game {
     const getCanvasWidth = () => {
       const W = window.innerWidth;
       const H = window.innerHeight;
-      const isDesktop = W > 900;
-      const isMobileLandscape = W <= 900 && W > H && H <= 500; // telefono orizzontale
+      const isMobileLandscape = W > H && (H <= 550 || W <= 950); // telefoni orizzontali (inclusi Max/Plus)
+      const isDesktop = W > 768 && !isMobileLandscape;           // desktop / tablet
       if (isDesktop) return W - 320;          // pannello inventario desktop (320px destra)
       if (isMobileLandscape) return W - 190;  // strip inventario landscape (190px destra)
       return W;                               // mobile portrait: tutto schermo
