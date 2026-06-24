@@ -89,10 +89,10 @@ class ForestaScene {
       new THREE.MeshLambertMaterial({ color: 0x0a2008 }),
     ];
 
-    // Anello di alberi fitto attorno alla radura
-    for (let i = 0; i < 55; i++) {
-      const angle  = (i / 55) * Math.PI * 2;
-      const radius = 9 + Math.random() * 10;
+    // Anello di alberi più sparso attorno alla radura
+    for (let i = 0; i < 40; i++) {
+      const angle  = (i / 40) * Math.PI * 2;
+      const radius = 10 + Math.random() * 12;
       const height = 3.5 + Math.random() * 5;
       const grp    = new THREE.Group();
 
@@ -122,8 +122,11 @@ class ForestaScene {
       const tz = Math.sin(angle) * radius;
 
       // ── Lascia aperto il corridoio verso la Riva della Nostalgia ──
-      // Zona sinistra: x < -8, z tra -8 e 6  → passaggio alla spiaggia
       if (tx < -8 && tz > -8 && tz < 6) continue;
+
+      // ── Lascia libera la visuale della telecamera (centro-sud) ──
+      // Previene che gli alberi coprano il personaggio lungo il percorso principale
+      if (Math.abs(tx) < 8 && tz > -2) continue;
 
       grp.position.set(tx, 0, tz);
       scene.add(grp);
