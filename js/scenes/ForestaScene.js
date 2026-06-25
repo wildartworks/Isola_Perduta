@@ -1322,8 +1322,25 @@ class ForestaScene {
 
         // Il giocatore colpisce il nemico
         if (isPlayerAttacking && dist < 1.8 && enemy.isHurtCooldown <= 0) {
-          enemy.health -= 34; // muore in 3 colpi
+          // Calcola il danno in base all'arma equipaggiata nella mano destra
+          const weapon = this.g.inv.equipped.right;
+          let damage = 10; // Danno base (mani nude)
+          let weaponName = "a mani nude";
+          let soundFreq = 250;
+
+          if (weapon === 'pugnale_antico') {
+            damage = 35;
+            weaponName = "con il Pugnale Antico";
+            soundFreq = 480;
+          } else if (weapon === 'arpione_cerimoniale') {
+            damage = 50;
+            weaponName = "con l'Arpione Cerimoniale";
+            soundFreq = 580;
+          }
+
+          enemy.health -= damage;
           enemy.isHurtCooldown = 0.6;
+          this.g.notify(`⚔️ Colpisci ${enemy.name} ${weaponName} per ${damage} danni!`);
           
           // Aggiorna barra salute
           if (enemy.healthBar) {
@@ -1343,7 +1360,7 @@ class ForestaScene {
           }
 
           // Suono colpo
-          this.g.audio.playTone(380, 'triangle', 0.12, 0.12);
+          this.g.audio.playTone(soundFreq, 'triangle', 0.12, 0.12);
 
           // Controllo morte nemico
           if (enemy.health <= 0) {

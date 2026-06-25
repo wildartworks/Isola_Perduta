@@ -1,6 +1,9 @@
 /* ── PLAYER ── */
 class Player {
   constructor(scene) {
+    this.g = null;
+    this._weaponInitialized = false;
+    this.currentWeaponMesh = null;
     this.grp = new THREE.Group();
     this.target = new THREE.Vector3();
     this.moving = false;
@@ -59,6 +62,9 @@ class Player {
 
         console.log('[Player] Animazioni disponibili:', Object.keys(this.anims));
         this._switchAnim('Pirata_idle');
+        if (this.g && this.g.inv) {
+          this.updateEquippedWeapon(this.g.inv.equipped.right);
+        }
       },
       undefined,
       (err) => {
@@ -194,6 +200,11 @@ class Player {
   update(dt, keys = {}) {
     if(this.mixer) this.mixer.update(dt);
 
+    if (this.model && !this._weaponInitialized && this.g && this.g.inv) {
+      this._weaponInitialized = true;
+      this.updateEquippedWeapon(this.g.inv.equipped.right);
+    }
+
     // Attacco con Spazio
     if (keys[' '] && !this._spaceWasDown) {
       this._spaceWasDown = true;
@@ -253,5 +264,158 @@ class Player {
   setBounds(bx, bz) {
     this.boundX = bx;
     this.boundZ = bz;
+  }
+
+  findHandBone(parent) {
+    let found = null;
+    
+    // First pass: look for right hand bones with exact or common patterns
+    const regexList = [
+      /mixamorigRightHand/i,
+      /RightHand/i,
+      /Hand_R/i,
+      /Hand\.R/i,
+      /R_Hand/i,
+      /r.*hand/i,
+      /right.*hand/i,
+      /wrist_r/i,
+      /wrist.*r/i
+    ];
+
+    for (const regex of regexList) {
+      parent.traverse(child => {
+        if (!found && child.isBone && regex.test(child.name)) {
+          found = child;
+        }
+      });
+      if (found) break;
+    }
+
+    // Fallback: look for any bone containing 'right'
+    if (!found) {
+      parent.traverse(child => {
+        if (!found && child.isBone && child.name.toLowerCase().includes('right')) {
+          found = child;
+        }
+      });
+    }
+
+    if (found) {
+      console.log(`[Player] Trovato osso mano destra: ${found.name}`);
+    } else {
+      console.warn("[Player] Impossibile trovare l'osso della mano destra!");
+    }
+    return found;
+  }
+
+  updateEquippedWeapon(itemId) {
+    // Rimuovi la mesh precedente se esiste
+    if (this.currentWeaponMesh && this.currentWeaponMesh.parent) {
+      this.currentWeaponMesh.parent.remove(this.currentWeaponMesh);
+    }
+    this.currentWeaponMesh = null;
+
+    if (!itemId || !this.model) return;
+
+    // Controlla se l'oggetto è un'arma
+    if (itemId !== 'pugnale_antico' && itemId !== 'arpione_cerimoniale') {
+      return;
+    }
+
+    // Trova l'osso della mano destra
+    const handBone = this.findHandBone(this.model);
+    if (!handBone) {
+      return;
+    }
+
+    // Crea la mesh dell'arma
+    const weaponGroup = new THREE.Group();
+
+    if (itemId === 'pugnale_antico') {
+      // Lama
+      const bladeGeo = new THREE.BoxGeometry(0.06, 0.45, 0.02);
+      const bladeMat = new THREE.MeshStandardMaterial({
+        color: 0xe0e0e0,
+        metalness: 0.9,
+        roughness: 0.15
+      });
+      const blade = new THREE.Mesh(bladeGeo, bladeMat);
+      blade.position.y = 0.28; // Estendi in alto dall'elsa
+      weaponGroup.add(blade);
+
+      // Elsa (Guardia)
+      const guardGeo = new THREE.BoxGeometry(0.16, 0.03, 0.03);
+      const guardMat = new THREE.MeshStandardMaterial({
+        color: 0xb5a642, // Ottone/Oro antico
+        metalness: 0.8,
+        roughness: 0.25
+      });
+      const guard = new THREE.Mesh(guardGeo, guardMat);
+      guard.position.y = 0.06;
+      weaponGroup.add(guard);
+
+      // Impugnatura
+      const hiltGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.12, 8);
+      const hiltMat = new THREE.MeshStandardMaterial({
+        color: 0x3d2314, // Cuoio scuro
+        roughness: 0.9
+      });
+      const hilt = new THREE.Mesh(hiltGeo, hiltMat);
+      hilt.position.y = 0.0;
+      weaponGroup.add(hilt);
+      
+      // Orientamento per la mano del personaggio
+      weaponGroup.rotation.x = Math.PI / 2; // Punta in avanti
+      weaponGroup.rotation.z = Math.PI / 2;
+      weaponGroup.position.set(0, 0.05, 0);
+      weaponGroup.scale.set(0.7, 0.7, 0.7); // Ridimensiona per adattarsi alla mano
+
+    } else if (itemId === 'arpione_cerimoniale') {
+      // Asta in legno
+      const staffGeo = new THREE.CylinderGeometry(0.015, 0.015, 1.4, 8);
+      const staffMat = new THREE.MeshStandardMaterial({
+        color: 0x422616, // legno scuro
+        roughness: 0.85
+      });
+      const staff = new THREE.Mesh(staffGeo, staffMat);
+      staff.position.y = 0.3;
+      weaponGroup.add(staff);
+
+      // Gruppo della punta dell'arpione
+      const tipGroup = new THREE.Group();
+      
+      // Punta centrale
+      const centerTipGeo = new THREE.ConeGeometry(0.035, 0.18, 4);
+      const goldMat = new THREE.MeshStandardMaterial({
+        color: 0xd4af37, // Oro cerimoniale
+        metalness: 0.85,
+        roughness: 0.2
+      });
+      const centerTip = new THREE.Mesh(centerTipGeo, goldMat);
+      centerTip.position.y = 1.05;
+      tipGroup.add(centerTip);
+
+      // Alette laterali del tridente
+      const prongLGeo = new THREE.BoxGeometry(0.012, 0.12, 0.025);
+      const prongL = new THREE.Mesh(prongLGeo, goldMat);
+      prongL.position.set(-0.06, 0.95, 0);
+      prongL.rotation.z = -0.15;
+      tipGroup.add(prongL);
+
+      const prongR = prongL.clone();
+      prongR.position.x = 0.06;
+      prongR.rotation.z = 0.15;
+      tipGroup.add(prongR);
+
+      weaponGroup.add(tipGroup);
+      
+      // Orientamento per la mano
+      weaponGroup.rotation.x = Math.PI / 2;
+      weaponGroup.position.set(0, 0.05, 0);
+      weaponGroup.scale.set(0.8, 0.8, 0.8);
+    }
+
+    handBone.add(weaponGroup);
+    this.currentWeaponMesh = weaponGroup;
   }
 }

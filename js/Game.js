@@ -241,6 +241,7 @@ class Game {
     this.scene.add(dl);
     
     this.player = new Player(this.scene);
+    this.player.g = this;
 
     // ── Gestione visibilità pulsanti per il livello Quest di tutorial ──
     const exitBtn = document.getElementById('exit-quest-btn');
