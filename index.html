@@ -1142,6 +1142,10 @@ class Inventory {
   equip(id, hand) {
     if(hand === 'left') this.equipped.left = id;
     if(hand === 'right') this.equipped.right = id;
+    if(this.g && this.g.player && typeof this.g.player.updateEquippedWeapon === 'function') {
+      const activeId = this.equipped.right || this.equipped.left;
+      this.g.player.updateEquippedWeapon(activeId);
+    }
     this.render();
   }
   render() {
@@ -1263,8 +1267,9 @@ class Inventory {
 
 /* ── PLAYER ── */
 class Player {
-  constructor(scene) {
+  constructor(scene, game = null) {
     this.scene = scene;
+    this.g = game;
     this.grp = new THREE.Group();
     this.target = new THREE.Vector3();
     this.moving = false;
@@ -1323,6 +1328,10 @@ class Player {
 
         console.log('[Player] Animazioni disponibili:', Object.keys(this.anims));
         this._switchAnim('Pirata_idle');
+        if (this.g && this.g.inv) {
+          const activeId = this.g.inv.equipped.right || this.g.inv.equipped.left;
+          this.updateEquippedWeapon(activeId);
+        }
       },
       undefined,
       (err) => {
@@ -1431,6 +1440,159 @@ class Player {
     }
   }
 
+  findHandBone(parent) {
+    let found = null;
+    const regexList = [
+      /mixamorigRightHand/i,
+      /RightHand/i,
+      /Hand_R/i,
+      /Hand\.R/i,
+      /R_Hand/i,
+      /r.*hand/i,
+      /right.*hand/i,
+      /wrist_r/i,
+      /wrist.*r/i
+    ];
+    for (const regex of regexList) {
+      parent.traverse(child => {
+        if (!found && child.isBone && regex.test(child.name)) {
+          found = child;
+        }
+      });
+      if (found) break;
+    }
+    if (!found) {
+      parent.traverse(child => {
+        if (!found && child.isBone && child.name.toLowerCase().includes('right')) {
+          found = child;
+        }
+      });
+    }
+    if (found) {
+      console.log(`[Player] Trovato osso mano destra: ${found.name}`);
+    } else {
+      console.warn("[Player] Impossibile trovare l'osso della mano destra!");
+    }
+    return found;
+  }
+
+  updateEquippedWeapon(itemId) {
+    if (this.currentWeaponMesh && this.currentWeaponMesh.parent) {
+      this.currentWeaponMesh.parent.remove(this.currentWeaponMesh);
+    }
+    this.currentWeaponMesh = null;
+
+    if (!itemId || !this.model) return;
+
+    let handBone = this.findHandBone(this.model);
+    let isFallback = false;
+    if (!handBone) {
+      handBone = this.grp;
+      isFallback = true;
+    }
+
+    const weaponGroup = new THREE.Group();
+    let baseScale = 1.0;
+
+    if (itemId === 'pugnale_antico') {
+      const bladeGeo = new THREE.BoxGeometry(0.06, 0.45, 0.02);
+      const bladeMat = new THREE.MeshStandardMaterial({
+        color: 0xe0e0e0,
+        metalness: 0.9,
+        roughness: 0.15
+      });
+      const blade = new THREE.Mesh(bladeGeo, bladeMat);
+      blade.position.y = 0.28;
+      weaponGroup.add(blade);
+
+      const guardGeo = new THREE.BoxGeometry(0.16, 0.03, 0.03);
+      const guardMat = new THREE.MeshStandardMaterial({
+        color: 0xb5a642,
+        metalness: 0.8,
+        roughness: 0.25
+      });
+      const guard = new THREE.Mesh(guardGeo, guardMat);
+      guard.position.y = 0.06;
+      weaponGroup.add(guard);
+
+      const hiltGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.12, 8);
+      const hiltMat = new THREE.MeshStandardMaterial({
+        color: 0x3d2314,
+        roughness: 0.9
+      });
+      const hilt = new THREE.Mesh(hiltGeo, hiltMat);
+      hilt.position.y = 0.0;
+      weaponGroup.add(hilt);
+      
+      weaponGroup.rotation.x = Math.PI / 2;
+      weaponGroup.rotation.z = Math.PI / 2;
+      weaponGroup.position.set(0, 0.05, 0);
+      baseScale = 0.7;
+
+    } else if (itemId === 'arpione_cerimoniale') {
+      const staffGeo = new THREE.CylinderGeometry(0.015, 0.015, 1.4, 8);
+      const staffMat = new THREE.MeshStandardMaterial({
+        color: 0x422616,
+        roughness: 0.85
+      });
+      const staff = new THREE.Mesh(staffGeo, staffMat);
+      staff.position.y = 0.3;
+      weaponGroup.add(staff);
+
+      const tipGroup = new THREE.Group();
+      const centerTipGeo = new THREE.ConeGeometry(0.035, 0.18, 4);
+      const goldMat = new THREE.MeshStandardMaterial({
+        color: 0xd4af37,
+        metalness: 0.85,
+        roughness: 0.2
+      });
+      const centerTip = new THREE.Mesh(centerTipGeo, goldMat);
+      centerTip.position.y = 1.05;
+      tipGroup.add(centerTip);
+
+      const prongLGeo = new THREE.BoxGeometry(0.012, 0.12, 0.025);
+      const prongL = new THREE.Mesh(prongLGeo, goldMat);
+      prongL.position.set(-0.06, 0.95, 0);
+      prongL.rotation.z = -0.15;
+      tipGroup.add(prongL);
+
+      const prongR = prongL.clone();
+      prongR.position.x = 0.06;
+      prongR.rotation.z = 0.15;
+      tipGroup.add(prongR);
+
+      weaponGroup.add(tipGroup);
+      
+      weaponGroup.rotation.x = Math.PI / 2;
+      weaponGroup.position.set(0, 0.05, 0);
+      baseScale = 0.8;
+
+    } else {
+      const genericGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
+      const genericMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 1.0 });
+      const genericMesh = new THREE.Mesh(genericGeo, genericMat);
+      weaponGroup.add(genericMesh);
+      weaponGroup.position.set(0, 0.06, 0);
+      baseScale = 1.0;
+    }
+
+    if (isFallback) {
+      weaponGroup.position.set(0.4, 1.2, 0);
+      weaponGroup.rotation.set(0, 0, 0);
+      weaponGroup.scale.set(baseScale, baseScale, baseScale);
+    } else {
+      const worldScale = new THREE.Vector3();
+      handBone.getWorldScale(worldScale);
+      const sx = worldScale.x > 0.0001 ? baseScale / worldScale.x : baseScale;
+      const sy = worldScale.y > 0.0001 ? baseScale / worldScale.y : baseScale;
+      const sz = worldScale.z > 0.0001 ? baseScale / worldScale.z : baseScale;
+      weaponGroup.scale.set(sx, sy, sz);
+    }
+
+    handBone.add(weaponGroup);
+    this.currentWeaponMesh = weaponGroup;
+  }
+
   move(x, z) {
     this.target.set(x, 0, z);
     this.moving = true;
@@ -1456,6 +1618,12 @@ class Player {
     const prevZ = this.grp.position.z;
 
     if(this.mixer) this.mixer.update(dt);
+
+    if (this.model && !this._weaponInitialized && this.g && this.g.inv) {
+      this._weaponInitialized = true;
+      const activeId = this.g.inv.equipped.right || this.g.inv.equipped.left;
+      this.updateEquippedWeapon(activeId);
+    }
 
     // Attacco con Spazio (una volta per pressione)
     if (keys[' '] && !this._spaceWasDown) {
@@ -2083,7 +2251,7 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
     dl.shadow.mapSize.set(1024, 1024);
     this.scene.add(dl);
     
-    this.player = new Player(this.scene);
+    this.player = new Player(this.scene, this);
     this.player.grp.position.set(startX, 0, startZ);
     // Assegna il nome reale del personaggio selezionato per l'editor
     const selectedCharData = GAME_DATA.characters[this.charId];
