@@ -419,12 +419,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 
   /* D-pad: più piccolo, in basso a sinistra sopra i controlli */
   #mobile-ctrls{
-    bottom:6px!important;
-    left:6px!important;
+    bottom:20px!important;
+    left:20px!important;
+    z-index: 99999 !important;
   }
   #mobile-action{
-    bottom:6px!important;
-    right:200px!important; /* a destra del D-pad ma fuori dall'inventario */
+    bottom:20px!important;
+    right:220px!important; /* a destra del D-pad ma fuori dall'inventario */
+    z-index: 99999 !important;
   }
   #mobile-ctrls, #mobile-action { display: flex !important; }
   #mbtn-up,#mbtn-down,#mbtn-left,#mbtn-right{

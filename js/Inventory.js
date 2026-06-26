@@ -39,7 +39,8 @@ class Inventory {
     if(hand === 'left') this.equipped.left = id;
     if(hand === 'right') this.equipped.right = id;
     if(this.g && this.g.player && typeof this.g.player.updateEquippedWeapon === 'function') {
-      this.g.player.updateEquippedWeapon(this.equipped.right);
+      const activeId = this.equipped.right || this.equipped.left;
+      this.g.player.updateEquippedWeapon(activeId);
     }
     this.render();
   }
