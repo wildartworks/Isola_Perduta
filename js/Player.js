@@ -317,14 +317,17 @@ class Player {
 
     if (!itemId || !this.model) return;
 
-    // Trova l'osso della mano destra
-    const handBone = this.findHandBone(this.model);
+    // Trova l'osso della mano destra, altrimenti usa un fallback
+    let handBone = this.findHandBone(this.model);
+    let isFallback = false;
     if (!handBone) {
-      return;
+      handBone = this.grp;
+      isFallback = true;
     }
 
     // Crea la mesh dell'arma
     const weaponGroup = new THREE.Group();
+    let baseScale = 1.0;
 
     if (itemId === 'pugnale_antico') {
       // Lama
@@ -363,14 +366,7 @@ class Player {
       weaponGroup.rotation.x = Math.PI / 2; // Punta in avanti
       weaponGroup.rotation.z = Math.PI / 2;
       weaponGroup.position.set(0, 0.05, 0);
-
-      // Correzione della scala in base all'osso per evitare deformazioni
-      const worldScale = new THREE.Vector3();
-      handBone.getWorldScale(worldScale);
-      const sx = worldScale.x > 0.0001 ? 0.7 / worldScale.x : 0.7;
-      const sy = worldScale.y > 0.0001 ? 0.7 / worldScale.y : 0.7;
-      const sz = worldScale.z > 0.0001 ? 0.7 / worldScale.z : 0.7;
-      weaponGroup.scale.set(sx, sy, sz);
+      baseScale = 0.7;
 
     } else if (itemId === 'arpione_cerimoniale') {
       // Asta in legno
@@ -414,13 +410,7 @@ class Player {
       // Orientamento per la mano
       weaponGroup.rotation.x = Math.PI / 2;
       weaponGroup.position.set(0, 0.05, 0);
-
-      const worldScale = new THREE.Vector3();
-      handBone.getWorldScale(worldScale);
-      const sx = worldScale.x > 0.0001 ? 0.8 / worldScale.x : 0.8;
-      const sy = worldScale.y > 0.0001 ? 0.8 / worldScale.y : 0.8;
-      const sz = worldScale.z > 0.0001 ? 0.8 / worldScale.z : 0.8;
-      weaponGroup.scale.set(sx, sy, sz);
+      baseScale = 0.8;
 
     } else {
       // Oggetto generico (sacchetto/scatola per far capire che ha qualcosa in mano)
@@ -429,12 +419,20 @@ class Player {
       const genericMesh = new THREE.Mesh(genericGeo, genericMat);
       weaponGroup.add(genericMesh);
       weaponGroup.position.set(0, 0.06, 0);
+      baseScale = 1.0;
+    }
 
+    if (isFallback) {
+      weaponGroup.position.set(0.4, 1.2, 0); // Fluttua accanto al giocatore
+      weaponGroup.rotation.set(0, 0, 0);
+      weaponGroup.scale.set(baseScale, baseScale, baseScale);
+    } else {
+      // Correzione della scala in base all'osso per evitare deformazioni (modelli esportati a 0.01 ecc)
       const worldScale = new THREE.Vector3();
       handBone.getWorldScale(worldScale);
-      const sx = worldScale.x > 0.0001 ? 1.0 / worldScale.x : 1.0;
-      const sy = worldScale.y > 0.0001 ? 1.0 / worldScale.y : 1.0;
-      const sz = worldScale.z > 0.0001 ? 1.0 / worldScale.z : 1.0;
+      const sx = worldScale.x > 0.0001 ? baseScale / worldScale.x : baseScale;
+      const sy = worldScale.y > 0.0001 ? baseScale / worldScale.y : baseScale;
+      const sz = worldScale.z > 0.0001 ? baseScale / worldScale.z : baseScale;
       weaponGroup.scale.set(sx, sy, sz);
     }
 

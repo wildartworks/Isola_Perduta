@@ -254,7 +254,7 @@ class Game {
       // Posizione iniziale per il tutorial al centro radura
       this.player.grp.position.set(0, 0, 0);
     } else {
-      if (exitBtn) exitBtn.style.display = 'none';
+      if (exitBtn) exitBtn.style.display = 'block';
       if (saveBtn) saveBtn.style.display = 'block';
       if (loadBtn) loadBtn.style.display = 'block';
       
