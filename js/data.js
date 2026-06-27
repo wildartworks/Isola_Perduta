@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // ISLA PERDIDA — Dati di Gioco
 // ============================================================
 
@@ -6,7 +6,7 @@ const GAME_DATA = {
 
   // ── PERSONAGGI GIOCABILI ──
   characters: {
-    elias: { id:'elias', name:'Elias Crow', pronoun:'lui', emoji:'🏴‍☠️', desc:'Un audace pirata avventuriero alla ricerca di risposte e leggendari tesori perduti.' },
+    elias: { id:'elias', name:'Elias Crow', pronoun:'lui', emoji:'🏴‍☠️', avatar: 'assets/Foto_Elias.webp', desc:'Un audace pirata avventuriero alla ricerca di risposte e leggendari tesori perduti.' },
     valentine: { id:'valentine', name:'Valentine Black', pronoun:'lei', emoji:'🏴‍☠️', avatar: 'assets/Foto_Valentine.webp', desc:'Una coraggiosa pirata esploratrice guidata da una misteriosa mappa stellare.' }
   },
 
