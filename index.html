@@ -86,7 +86,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 /* PORTRAIT */
 #iv-port{display:flex;flex-direction:row;gap:15px;align-items:center}
 #iv-face{width:70px;height:80px;background:#222;border:2px solid #555;border-top-color:#000;border-left-color:#000;border-bottom-color:#777;border-right-color:#777;display:flex;align-items:center;justify-content:center;font-size:3.5rem}
-#iv-name{font-family:var(--ft);color:var(--gold);font-size:1.15rem;text-shadow:2px 2px 0 #000;line-height:1.2}
+#iv-name{font-family:var(--ft);color:var(--gold);font-size:0.95rem;text-shadow:2px 2px 0 #000;line-height:1.2}
 /* HANDS */
 .iv-hands{display:flex;justify-content:space-around}
 .iv-slot{width:64px;height:64px;background:#222;border:2px solid #555;border-top-color:#000;border-left-color:#000;border-bottom-color:#777;border-right-color:#777;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative}
@@ -264,7 +264,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   .iv-sec{flex:1;min-width:110px;padding:6px}
   #iv-port{width:auto;flex:1}
   #iv-face{width:46px;height:50px;font-size:2.2rem}
-  #iv-name{font-size:.85rem}
+  #iv-name{font-size:.75rem}
   .iv-title{font-size:.7rem;margin-bottom:3px}
   #isl{grid-template-columns:repeat(5,1fr);gap:5px}
   .is{aspect-ratio:1}
@@ -668,11 +668,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
       <div class="iv-sec" id="iv-port">
         <div id="iv-face" style="font-size:2.5rem">&#x1F575;&#xFE0F;</div>
         <div style="flex:1">
-          <div id="iv-name" style="font-size:1.1rem">Scegli<br>un personaggio</div>
+          <div id="iv-name">Scegli<br>un personaggio</div>
+          
+          <!-- MEMORIA -->
           <div style="width:100%;height:6px;background:#0a1520;border:1px solid #1a3a5a;margin-top:6px;border-radius:3px">
             <div id="memory-fill" style="width:100%;height:100%;background:linear-gradient(90deg,#1a6aaa,#4acce0);border-radius:3px;transition:width 0.5s"></div>
           </div>
-          <div style="font-size:.6rem;color:#4a7a9a;margin-top:2px">MEMORIA</div>
+          <div style="font-size:.6rem;color:#4a7a9a;margin-top:2px;margin-bottom:6px">MEMORIA</div>
+          
+          <!-- SALUTE -->
+          <div style="width:100%;height:6px;background:#200505;border:1px solid #5a1a1a;border-radius:3px">
+            <div id="health-fill" style="width:100%;height:100%;background:linear-gradient(90deg,#c0392b,#e74c3c);border-radius:3px;transition:width 0.5s"></div>
+          </div>
+          <div style="font-size:.6rem;color:#e74c3c;margin-top:2px">SALUTE</div>
         </div>
       </div>
       <div class="iv-sec">
@@ -1957,8 +1965,8 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
     if (!this.inv.has('mappa_bagnata')) {
       this.inv.add('mappa_bagnata');
       if (this.audio) this.audio.playPickup();
-
     }
+    this.updateHealth(0);
   }
 
   handleAction(action) {
@@ -2024,6 +2032,8 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
     this.health = Math.max(0, Math.min(100, this.health + amount));
     const hb = document.getElementById('health-bar');
     if (hb) hb.style.width = this.health + '%';
+    const hf = document.getElementById('health-fill');
+    if (hf) hf.style.width = this.health + '%';
     if (this.health <= 0 && this.state === 'PLAY') {
       this.die();
     }
