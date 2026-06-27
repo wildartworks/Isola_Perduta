@@ -1481,17 +1481,38 @@ class Player {
       this.currentWeaponMesh.parent.remove(this.currentWeaponMesh);
     }
     this.currentWeaponMesh = null;
+    this.handBone = null;
 
     if (!itemId || !this.model) return;
 
     let handBone = this.findHandBone(this.model);
-    let isFallback = false;
     if (!handBone) {
-      handBone = this.grp;
-      isFallback = true;
+      console.warn("[Player] Hand bone not found, weapon will float next to player.");
+      const fallbackGroup = new THREE.Group();
+      const innerMesh = this.createWeaponInnerMesh(itemId);
+      fallbackGroup.add(innerMesh);
+      fallbackGroup.position.set(0.4, 1.2, 0);
+      this.grp.add(fallbackGroup);
+      this.currentWeaponMesh = fallbackGroup;
+      return;
     }
 
-    const weaponGroup = new THREE.Group();
+    this.handBone = handBone;
+
+    // Create outer weapon group that will follow the hand bone
+    const outerGroup = new THREE.Group();
+    
+    // Create inner mesh with specific offsets
+    const innerMesh = this.createWeaponInnerMesh(itemId);
+    outerGroup.add(innerMesh);
+
+    // Add outer group to player root group
+    this.grp.add(outerGroup);
+    this.currentWeaponMesh = outerGroup;
+  }
+
+  createWeaponInnerMesh(itemId) {
+    const innerGroup = new THREE.Group();
     let baseScale = 1.0;
 
     if (itemId === 'pugnale_antico') {
@@ -1503,7 +1524,7 @@ class Player {
       });
       const blade = new THREE.Mesh(bladeGeo, bladeMat);
       blade.position.y = 0.28;
-      weaponGroup.add(blade);
+      innerGroup.add(blade);
 
       const guardGeo = new THREE.BoxGeometry(0.16, 0.03, 0.03);
       const guardMat = new THREE.MeshStandardMaterial({
@@ -1513,7 +1534,7 @@ class Player {
       });
       const guard = new THREE.Mesh(guardGeo, guardMat);
       guard.position.y = 0.06;
-      weaponGroup.add(guard);
+      innerGroup.add(guard);
 
       const hiltGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.12, 8);
       const hiltMat = new THREE.MeshStandardMaterial({
@@ -1522,11 +1543,11 @@ class Player {
       });
       const hilt = new THREE.Mesh(hiltGeo, hiltMat);
       hilt.position.y = 0.0;
-      weaponGroup.add(hilt);
+      innerGroup.add(hilt);
       
-      weaponGroup.rotation.x = Math.PI / 2;
-      weaponGroup.rotation.z = Math.PI / 2;
-      weaponGroup.position.set(0, 0.05, 0);
+      innerGroup.rotation.x = Math.PI / 2;
+      innerGroup.rotation.z = Math.PI / 2;
+      innerGroup.position.set(0, 0.05, 0);
       baseScale = 0.7;
 
     } else if (itemId === 'arpione_cerimoniale') {
@@ -1537,7 +1558,7 @@ class Player {
       });
       const staff = new THREE.Mesh(staffGeo, staffMat);
       staff.position.y = 0.3;
-      weaponGroup.add(staff);
+      innerGroup.add(staff);
 
       const tipGroup = new THREE.Group();
       const centerTipGeo = new THREE.ConeGeometry(0.035, 0.18, 4);
@@ -1561,36 +1582,23 @@ class Player {
       prongR.rotation.z = 0.15;
       tipGroup.add(prongR);
 
-      weaponGroup.add(tipGroup);
+      innerGroup.add(tipGroup);
       
-      weaponGroup.rotation.x = Math.PI / 2;
-      weaponGroup.position.set(0, 0.05, 0);
+      innerGroup.rotation.x = Math.PI / 2;
+      innerGroup.position.set(0, 0.05, 0);
       baseScale = 0.8;
 
     } else {
       const genericGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
       const genericMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 1.0 });
       const genericMesh = new THREE.Mesh(genericGeo, genericMat);
-      weaponGroup.add(genericMesh);
-      weaponGroup.position.set(0, 0.06, 0);
+      innerGroup.add(genericMesh);
+      innerGroup.position.set(0, 0.06, 0);
       baseScale = 1.0;
     }
 
-    if (isFallback) {
-      weaponGroup.position.set(0.4, 1.2, 0);
-      weaponGroup.rotation.set(0, 0, 0);
-      weaponGroup.scale.set(baseScale, baseScale, baseScale);
-    } else {
-      const worldScale = new THREE.Vector3();
-      handBone.getWorldScale(worldScale);
-      const sx = worldScale.x > 0.0001 ? baseScale / worldScale.x : baseScale;
-      const sy = worldScale.y > 0.0001 ? baseScale / worldScale.y : baseScale;
-      const sz = worldScale.z > 0.0001 ? baseScale / worldScale.z : baseScale;
-      weaponGroup.scale.set(sx, sy, sz);
-    }
-
-    handBone.add(weaponGroup);
-    this.currentWeaponMesh = weaponGroup;
+    innerGroup.scale.set(baseScale, baseScale, baseScale);
+    return innerGroup;
   }
 
   move(x, z) {
@@ -1623,6 +1631,22 @@ class Player {
       this._weaponInitialized = true;
       const activeId = this.g.inv.equipped.right || this.g.inv.equipped.left;
       this.updateEquippedWeapon(activeId);
+    }
+
+    if (this.currentWeaponMesh && this.handBone) {
+      const wp = new THREE.Vector3();
+      const wq = new THREE.Quaternion();
+      this.handBone.getWorldPosition(wp);
+      this.handBone.getWorldQuaternion(wq);
+      
+      this.grp.worldToLocal(wp);
+      
+      const grpQuat = new THREE.Quaternion();
+      this.grp.getWorldQuaternion(grpQuat);
+      const localQuat = grpQuat.invert().multiply(wq);
+      
+      this.currentWeaponMesh.position.copy(wp);
+      this.currentWeaponMesh.quaternion.copy(localQuat);
     }
 
     // Attacco con Spazio (una volta per pressione)
