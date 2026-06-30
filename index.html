@@ -1500,13 +1500,21 @@ class Inventory {
 
       if (tapMoved || longPressTimer === null) return; // ignore swipe or expired timer
 
-      // ── Tap breve → selezione per equipaggiamento ──
-      if (this._pendingEquip === id) {
-        // Secondo tap sullo stesso oggetto → deseleziona
-        this._clearPendingEquip();
+      // ── Tap breve → selezione per equipaggiamento (oppure azione immediata se mappa/diario) ──
+      if (id === 'mappa_bagnata') {
+        this.g.openMap();
+      } else if (id === 'mappa_strappata') {
+        this.g.openImageOverlay('assets/frammento_mappa_pip.png');
+      } else if (id === 'diario_incompleto') {
+        this.g.openImageOverlay('assets/pagina_diario.webp');
       } else {
-        // Seleziona questo oggetto; poi l'utente tocca uno slot MANO
-        this._setPendingEquip(id, div);
+        if (this._pendingEquip === id) {
+          // Secondo tap sullo stesso oggetto → deseleziona
+          this._clearPendingEquip();
+        } else {
+          // Seleziona questo oggetto; poi l'utente tocca uno slot MANO
+          this._setPendingEquip(id, div);
+        }
       }
     }, { passive: true });
 
