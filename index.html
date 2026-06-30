@@ -1369,6 +1369,8 @@ class Inventory {
         div.onclick = () => {
           if (id === 'mappa_bagnata') {
             this.g.openMap();
+          } else if (id === 'mappa_strappata') {
+            this.g.openImageOverlay('assets/frammento_mappa_pip.png');
           } else if (id === 'diario_incompleto') {
             this.g.openImageOverlay('assets/pagina_diario.webp');
           } else {
