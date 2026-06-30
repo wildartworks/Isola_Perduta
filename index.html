@@ -1121,75 +1121,180 @@ class Inventory {
     this.hL = document.getElementById('iv-hand-l');
     this.hR = document.getElementById('iv-hand-r');
 
-    const setupHandSlot = (slotNode, hand) => {
-      slotNode.ondragover = (e) => e.preventDefault();
-      slotNode.ondrop = (e) => {
-        e.preventDefault();
-        const itemId = e.dataTransfer.getData('text/plain');
-        if (itemId) {
-          this.equip(itemId, hand);
-        }
-      };
+    // ── drag state shared between mouse and touch ──
+    this._drag = null; // { source:'bag'|'hand', hand?:'left'|'right', slotIdx?:number, itemId:string }
+
+    this._setupHandSlot(this.hL, 'left');
+    this._setupHandSlot(this.hR, 'right');
+  }
+
+  // ── HAND SLOT SETUP (dragover/drop + touch) ──────────────────────────
+  _setupHandSlot(node, hand) {
+    if (!node) return;
+
+    // Desktop drag-and-drop: receive from bag or other hand
+    node.ondragover = (e) => e.preventDefault();
+    node.ondrop = (e) => {
+      e.preventDefault();
+      const itemId  = e.dataTransfer.getData('text/plain');
+      const fromHand = e.dataTransfer.getData('fromHand');   // 'left' | 'right' | ''
+      const slotIdx  = parseInt(e.dataTransfer.getData('slot'));
+      if (!itemId) return;
+
+      if (fromHand) {
+        // Hand → Hand swap
+        this._swapHands(fromHand, hand);
+      } else if (!isNaN(slotIdx)) {
+        // Bag → Hand
+        this._moveFromBagToHand(slotIdx, hand);
+      }
     };
-    if (this.hL) setupHandSlot(this.hL, 'left');
-    if (this.hR) setupHandSlot(this.hR, 'right');
+
+    // Make the hand slot itself draggable so you can drag the item out
+    node.draggable = true;
+    node.ondragstart = (e) => {
+      const id = this.equipped[hand];
+      if (!id) { e.preventDefault(); return; }
+      e.dataTransfer.setData('text/plain', id);
+      e.dataTransfer.setData('fromHand', hand);
+      node.style.opacity = '0.5';
+    };
+    node.ondragend = () => { node.style.opacity = '1'; };
+
+    // Touch support (iOS / Android)
+    node.addEventListener('touchstart', (e) => this._onTouchStartHand(e, hand), { passive: false });
   }
-  add(id) { 
+
+  // ── MOVE BAG → HAND ──────────────────────────────────────────────────
+  _moveFromBagToHand(slotIdx, hand) {
+    const incoming = this.items[slotIdx];
+    if (!incoming) return;
+    const displaced = this.equipped[hand];
+
+    this.equipped[hand] = incoming;
+    this.items[slotIdx] = displaced; // swap: displaced goes back to bag slot
+    if (displaced === null) {
+      // nothing was in hand, just free the bag slot
+    }
+    this._afterEquipChange();
+  }
+
+  // ── MOVE HAND → BAG ──────────────────────────────────────────────────
+  _moveFromHandToBag(hand, targetSlotIdx) {
+    const itemId = this.equipped[hand];
+    if (!itemId) return;
+    const displaced = this.items[targetSlotIdx];
+
+    this.items[targetSlotIdx] = itemId;
+    this.equipped[hand] = displaced; // if bag slot was empty, hand becomes empty
+    this._afterEquipChange();
+  }
+
+  // ── SWAP HANDS ───────────────────────────────────────────────────────
+  _swapHands(fromHand, toHand) {
+    if (fromHand === toHand) return;
+    const tmp = this.equipped[fromHand];
+    this.equipped[fromHand] = this.equipped[toHand];
+    this.equipped[toHand] = tmp;
+    this._afterEquipChange();
+  }
+
+  // ── MOVE HAND → first empty bag slot (or notify if full) ─────────────
+  _unequipToFirstFreeSlot(hand) {
+    const itemId = this.equipped[hand];
+    if (!itemId) return;
     const idx = this.items.indexOf(null);
-    if(idx !== -1 && !this.has(id)) this.items[idx] = id;
-    this.render(); 
+    if (idx === -1) { this.g.notify('Zaino pieno!'); return; }
+    this.items[idx] = itemId;
+    this.equipped[hand] = null;
+    this._afterEquipChange();
   }
-  rem(id) { 
-    const idx = this.items.indexOf(id);
-    if(idx !== -1) this.items[idx] = null;
-    if(this.equipped.left === id) this.equipped.left = null;
-    if(this.equipped.right === id) this.equipped.right = null;
-    this.render(); 
-  }
-  has(id) { return this.items.includes(id); }
-  equip(id, hand) {
-    if(hand === 'left') this.equipped.left = id;
-    if(hand === 'right') this.equipped.right = id;
-    if(this.g && this.g.player && typeof this.g.player.updateEquippedWeapon === 'function') {
+
+  // ── AFTER ANY CHANGE ─────────────────────────────────────────────────
+  _afterEquipChange() {
+    if (this.g && this.g.player && typeof this.g.player.updateEquippedWeapon === 'function') {
       const activeId = this.equipped.right || this.equipped.left;
       this.g.player.updateEquippedWeapon(activeId);
     }
     this.render();
   }
+
+  // ── PUBLIC API ───────────────────────────────────────────────────────
+  add(id) {
+    const idx = this.items.indexOf(null);
+    if(idx !== -1 && !this.has(id)) this.items[idx] = id;
+    this.render();
+  }
+  rem(id) {
+    const idx = this.items.indexOf(id);
+    if(idx !== -1) this.items[idx] = null;
+    if(this.equipped.left  === id) this.equipped.left  = null;
+    if(this.equipped.right === id) this.equipped.right = null;
+    this.render();
+  }
+  has(id) { return this.items.includes(id) || this.equipped.left === id || this.equipped.right === id; }
+  equip(id, hand) {
+    // legacy: called by dblclick, ondblclick etc.
+    const displaced = this.equipped[hand];
+    this.equipped[hand] = id;
+    if (id && displaced && displaced !== id) {
+      // try to put displaced back in bag
+      const freeIdx = this.items.indexOf(null);
+      if (freeIdx !== -1) this.items[freeIdx] = displaced;
+    }
+    this._afterEquipChange();
+  }
+
+  // ── RENDER ───────────────────────────────────────────────────────────
   render() {
     this.slots.innerHTML = '';
     for (let i = 0; i < 12; i++) {
-      const id = this.items[i];
+      const id  = this.items[i];
       const div = document.createElement('div');
       div.className = 'is';
       div.dataset.slot = i;
-      
+
+      // ── drag-over: accept drops ──
       div.ondragover = (e) => e.preventDefault();
+
+      // ── drop ON a bag slot ──
       div.ondrop = (e) => {
         e.preventDefault();
+        const itemId   = e.dataTransfer.getData('text/plain');
+        const fromHand = e.dataTransfer.getData('fromHand');  // 'left'|'right'|''
         const fromSlot = parseInt(e.dataTransfer.getData('slot'));
-        if(!isNaN(fromSlot) && fromSlot !== i) {
-          const temp = this.items[i];
+
+        if (!itemId) return;
+
+        if (fromHand) {
+          // Hand → Bag slot
+          this._moveFromHandToBag(fromHand, i);
+        } else if (!isNaN(fromSlot) && fromSlot !== i) {
+          // Bag slot → Bag slot (simple swap inside bag)
+          const tmp     = this.items[i];
           this.items[i] = this.items[fromSlot];
-          this.items[fromSlot] = temp;
+          this.items[fromSlot] = tmp;
           this.render();
         }
       };
 
-      if(id) {
-        const itemDef = (GAME_DATA && GAME_DATA.items[id]) || { emoji: '?', name: id };
-        const memPct = this.g.memory / 100;
-        const displayName = (memPct < 0.4 && itemDef.nameCorrupt) ? itemDef.nameCorrupt : itemDef.name;
-        
+      if (id) {
+        const itemDef    = (GAME_DATA && GAME_DATA.items[id]) || { emoji: '?', name: id };
+        const memPct     = this.g.memory / 100;
+        const displayName= (memPct < 0.4 && itemDef.nameCorrupt) ? itemDef.nameCorrupt : itemDef.name;
+
         div.draggable = true;
         div.ondragstart = (e) => {
           e.dataTransfer.setData('text/plain', id);
           e.dataTransfer.setData('slot', i);
+          e.dataTransfer.setData('fromHand', '');
           div.style.opacity = '0.5';
         };
         div.ondragend = () => { div.style.opacity = '1'; };
-        
+
         div.innerHTML = `<div class="ie">${itemDef.emoji || '?'}</div><div class="in">${displayName}</div>`;
+
+        // ── single click: describe item ──
         div.onclick = () => {
           if (id === 'mappa_bagnata') {
             this.g.openMap();
@@ -1197,81 +1302,170 @@ class Inventory {
             this.g.openImageOverlay('assets/pagina_diario.webp');
           } else {
             const isProvvista = (id === 'pesce_essiccato' || id === 'acqua_dolce' || id === 'mango_fluorescente');
-            const itemDef = (GAME_DATA && GAME_DATA.items[id]) || { emoji: '?', name: id };
-            const memPct = this.g.memory / 100;
-            const displayName = (memPct < 0.4 && itemDef.nameCorrupt) ? itemDef.nameCorrupt : itemDef.name;
-            
+            const memP2 = this.g.memory / 100;
+            const dn2   = (memP2 < 0.4 && itemDef.nameCorrupt) ? itemDef.nameCorrupt : itemDef.name;
             let extraActionHtml = '';
-            if (isProvvista) {
-              extraActionHtml = ` <button id="use-item-btn" style="background:#27ae60; border:none; color:white; padding:4px 10px; border-radius:4px; cursor:pointer; font-weight:bold; margin-right:5px; font-family:var(--fb); font-size:0.85rem; box-shadow: 0 0 5px rgba(39,174,96,0.5);">CONSUMA</button>`;
-            }
-            
-            let fullMsg = `${itemDef.emoji} <strong>${displayName}</strong>: ${itemDef.desc || ''}`;
-            if (itemDef.hint) {
-              fullMsg += `<div style="margin-top: 10px; padding: 10px; background: rgba(200, 160, 64, 0.12); border-left: 4px solid var(--gold); border-radius: 4px; font-size: 0.92rem; color: #ebdcb9; font-family: var(--fb); line-height: 1.45; text-align: left; box-sizing: border-box;">💡 <em>${itemDef.hint}</em></div>`;
-            }
-            
+            if (isProvvista) extraActionHtml = ` <button id="use-item-btn" style="background:#27ae60;border:none;color:white;padding:4px 10px;border-radius:4px;cursor:pointer;font-weight:bold;margin-right:5px;font-family:var(--fb);font-size:0.85rem;box-shadow:0 0 5px rgba(39,174,96,0.5);">CONSUMA</button>`;
+            let fullMsg = `${itemDef.emoji} <strong>${dn2}</strong>: ${itemDef.desc || ''}`;
+            if (itemDef.hint) fullMsg += `<div style="margin-top:10px;padding:10px;background:rgba(200,160,64,0.12);border-left:4px solid var(--gold);border-radius:4px;font-size:0.92rem;color:#ebdcb9;font-family:var(--fb);line-height:1.45;text-align:left;box-sizing:border-box;">💡 <em>${itemDef.hint}</em></div>`;
             this.g.notify(fullMsg, true, () => {
               if (isProvvista) {
                 const useBtn = document.getElementById('use-item-btn');
                 if (useBtn) {
-                  useBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    if (id === 'pesce_essiccato') {
-                      this.g.updateHealth(40);
-                      this.rem(id);
-                      this.g.notify("🐟 Mangiato Pesce Essiccato (+40% Salute)");
-                      this.g.audio.playTone(450, 'sine', 0.2, 0.1);
-                    } else if (id === 'acqua_dolce') {
-                      this.g.updateHealth(50);
-                      this.rem(id);
-                      this.g.notify("🥛 Bevuto Acqua Dolce (+50% Salute)");
-                      this.g.audio.playTone(500, 'sine', 0.25, 0.1);
-                    } else if (id === 'mango_fluorescente') {
-                      this.g.updateHealth(40);
-                      this.rem(id);
-                      this.g.notify("🟢 Mangiato Mango Fluorescente (+40% Salute)");
-                      this.g.audio.playTone(450, 'sine', 0.2, 0.1);
-                    }
+                  useBtn.onclick = (ev) => {
+                    ev.stopPropagation();
+                    const restoreMap = { pesce_essiccato:[40,'🐟 Mangiato Pesce Essiccato (+40% Salute)',450], acqua_dolce:[50,'🥛 Bevuto Acqua Dolce (+50% Salute)',500], mango_fluorescente:[40,'🟢 Mangiato Mango Fluorescente (+40% Salute)',450] };
+                    const r = restoreMap[id];
+                    if (r) { this.g.updateHealth(r[0]); this.rem(id); this.g.notify(r[1]); this.g.audio.playTone(r[2],'sine',0.2,0.1); }
                   };
                 }
               }
             }, extraActionHtml);
-            
             this.g.audio.playClick();
           }
         };
+
+        // ── double-click: quick-equip to right hand (or unequip) ──
         div.ondblclick = () => {
-          if (this.equipped.right === id) {
-            this.equip(null, 'right');
-            this.g.notify("Mano destra libera.");
-          } else if (this.equipped.left === id) {
-            this.equip(null, 'left');
-            this.g.notify("Mano sinistra libera.");
+          const inLeft  = this.equipped.left  === id;
+          const inRight = this.equipped.right === id;
+          if (inRight) {
+            this._unequipToFirstFreeSlot('right');
+            this.g.notify('Mano destra libera.');
+          } else if (inLeft) {
+            this._unequipToFirstFreeSlot('left');
+            this.g.notify('Mano sinistra libera.');
           } else {
             this.equip(id, 'right');
             this.g.notify(`Equipaggiato ${displayName} in Mano Dx.`);
           }
-          this.g.audio.playTone(600, 'sine', 0.08, 0.15);
+          this.g.audio.playTone(600,'sine',0.08,0.15);
         };
+
+        // ── touch: long-press to start drag, tap to describe ──
+        this._addTouchToBagSlot(div, id, i);
       }
       this.slots.appendChild(div);
     }
 
-    const renderHand = (node, id) => {
+    // ── Render hand slots ──
+    const renderHand = (node, id, hand) => {
       node.innerHTML = '';
-      if(id) {
+      if (id) {
         const itemDef = GAME_DATA.items[id];
-        node.innerHTML = `<span class="ie" style="font-size:2.5rem">${itemDef ? itemDef.emoji : '?'}</span>`;
-        node.onclick = () => { this.equip(null, node.id.includes('l')?'left':'right'); };
+        node.innerHTML = `<span class="ie" style="font-size:2rem">${itemDef ? itemDef.emoji : '?'}</span>`;
+        // click on hand slot → unequip back to bag
+        node.onclick = () => {
+          this._unequipToFirstFreeSlot(hand);
+          this.g.notify(`${id} rimosso dalla mano.`);
+        };
       } else {
         node.onclick = null;
       }
     };
-    renderHand(this.hL, this.equipped.left);
-    renderHand(this.hR, this.equipped.right);
+    renderHand(this.hL, this.equipped.left,  'left');
+    renderHand(this.hR, this.equipped.right, 'right');
+  }
+
+  // ── TOUCH SUPPORT ────────────────────────────────────────────────────
+  // Shared drag-state for touch
+  _startTouchDrag(itemId, source, extra) {
+    this._drag = { itemId, source, ...extra };
+  }
+
+  _addTouchToBagSlot(div, id, slotIdx) {
+    let longPressTimer = null;
+    let dragging = false;
+
+    div.addEventListener('touchstart', (e) => {
+      dragging = false;
+      longPressTimer = setTimeout(() => {
+        dragging = true;
+        this._startTouchDrag(id, 'bag', { slotIdx });
+        div.style.opacity = '0.5';
+        this.g.notify(`📦 Trascina "${id}" verso una mano.`);
+      }, 350);
+    }, { passive: true });
+
+    div.addEventListener('touchend', (e) => {
+      clearTimeout(longPressTimer);
+      if (!dragging) return; // was a short tap → onclick handles it
+      div.style.opacity = '1';
+      const touch = e.changedTouches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (!target) { this._drag = null; return; }
+      const handEl = target.closest('#iv-hand-l, #iv-hand-r');
+      if (handEl) {
+        const hand = handEl.id === 'iv-hand-l' ? 'left' : 'right';
+        this._moveFromBagToHand(slotIdx, hand);
+      } else {
+        const bagDiv = target.closest('[data-slot]');
+        if (bagDiv && this._drag) {
+          const toSlot = parseInt(bagDiv.dataset.slot);
+          if (!isNaN(toSlot) && toSlot !== slotIdx) {
+            const tmp = this.items[toSlot];
+            this.items[toSlot] = this.items[slotIdx];
+            this.items[slotIdx] = tmp;
+            this.render();
+          }
+        }
+      }
+      this._drag = null;
+    }, { passive: true });
+
+    div.addEventListener('touchcancel', () => {
+      clearTimeout(longPressTimer);
+      div.style.opacity = '1';
+      this._drag = null;
+    }, { passive: true });
+  }
+
+  _onTouchStartHand(e, hand) {
+    const id = this.equipped[hand];
+    if (!id) return;
+    let dragging = false;
+    const node = e.currentTarget;
+
+    const longPress = setTimeout(() => {
+      dragging = true;
+      this._startTouchDrag(id, 'hand', { hand });
+      node.style.opacity = '0.5';
+      this.g.notify(`✋ Trascina "${id}" verso lo zaino o l'altra mano.`);
+    }, 350);
+
+    const onEnd = (ev) => {
+      clearTimeout(longPress);
+      node.style.opacity = '1';
+      if (!dragging) return;
+      const touch = ev.changedTouches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (!target) { this._drag = null; return; }
+      // dropped on other hand?
+      const handEl = target.closest('#iv-hand-l, #iv-hand-r');
+      if (handEl) {
+        const toHand = handEl.id === 'iv-hand-l' ? 'left' : 'right';
+        if (toHand !== hand) this._swapHands(hand, toHand);
+      } else {
+        // dropped on bag slot?
+        const bagDiv = target.closest('[data-slot]');
+        if (bagDiv) {
+          const toSlot = parseInt(bagDiv.dataset.slot);
+          if (!isNaN(toSlot)) this._moveFromHandToBag(hand, toSlot);
+        } else {
+          // dropped in empty area → unequip to first free slot
+          this._unequipToFirstFreeSlot(hand);
+        }
+      }
+      this._drag = null;
+      node.removeEventListener('touchend', onEnd);
+      node.removeEventListener('touchcancel', onEnd);
+    };
+
+    node.addEventListener('touchend', onEnd, { passive: true });
+    node.addEventListener('touchcancel', onEnd, { passive: true });
   }
 }
+
 
 /* ── PLAYER ── */
 class Player {
