@@ -202,6 +202,33 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   transform: scale(1.05);
 }
 
+/* Piccolo tasto EXIT mobile, visibile solo su touch devices */
+#mobile-exit-btn {
+  display: none; /* nascosto di default, attivato via JS su touch */
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 99999;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c0392b, #962d22);
+  border: 2px solid rgba(255,255,255,0.5);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(192,57,43,0.4);
+  transition: transform 0.1s, opacity 0.2s;
+}
+#mobile-exit-btn:active {
+  transform: scale(0.88);
+  opacity: 0.85;
+}
+
 /* MOBILE */
 @media (max-width:768px) {
   #cv{width:100%!important}
@@ -721,6 +748,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
     <button id="lb" title="Carica Partita" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">📂</button>
     <button id="mb" title="Mute" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">🔊</button>
   </div>
+
+  <!-- Piccolo EXIT per mobile (fuori dall'inventario) -->
+  <button id="mobile-exit-btn" title="Torna al Menu" onclick="window.exitQuestLevel()" aria-label="Exit">🚪</button>
   <!-- MAP OVERLAY -->
   <div id="map-overlay" class="hidden">
     <div class="map-container">
@@ -3724,6 +3754,19 @@ window.toggleMobileInventory = () => {
     if (ctrls) ctrls.style.display = 'flex';
     if (action) action.style.display = 'flex';
 
+    // Pulsante EXIT mobile: mostrato solo quando l'HUD di gioco è attivo
+    const mobileExitBtn = document.getElementById('mobile-exit-btn');
+    const hud = document.getElementById('hud');
+    if (mobileExitBtn && hud) {
+      // Mostra/nascondi EXIT insieme all'HUD
+      const syncExitBtn = () => {
+        mobileExitBtn.style.display = hud.classList.contains('hidden') ? 'none' : 'flex';
+      };
+      const hudObserver = new MutationObserver(syncExitBtn);
+      hudObserver.observe(hud, { attributes: true, attributeFilter: ['class'] });
+      syncExitBtn(); // stato iniziale
+    }
+
     // Evita il trascinamento/rimbalzo generale dell'inventario su iOS Safari
     const iv = document.getElementById('iv');
     if (iv) {
@@ -3736,6 +3779,7 @@ window.toggleMobileInventory = () => {
       }, { passive: false });
     }
   }
+
 
   const isMobile = window.innerWidth <= 768;
   if (!isMobile) return;
