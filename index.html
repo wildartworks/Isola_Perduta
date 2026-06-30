@@ -633,7 +633,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   <div id="hud" class="hidden">
     <div id="sn"></div>
     <div id="ca"></div>
-    <div id="debug-panel" style="display:none;position:fixed;top:60px;left:10px;background:rgba(0,0,0,0.8);color:lime;font-family:monospace;padding:10px;font-size:12px;z-index:9999;pointer-events:none;">Debug...</div>
     <div id="status-bars-wrap" style="position:absolute;top:1rem;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:20px;background:rgba(0,0,0,.65);padding:.4em 1.2em;border-radius:20px;border:1px solid rgba(100,160,200,.3);backdrop-filter:blur(4px)">
       <!-- MEMORIA -->
       <div style="display:flex;align-items:center;gap:8px">
@@ -1463,11 +1462,16 @@ class Inventory {
       }, 380);
     }, { passive: true });
 
-    div.addEventListener('touchmove', () => {
+    // touchmove: blocca lo scorrimento della pagina/zaino se l'utente sta trascinando un oggetto
+    const onTouchMove = (e) => {
       tapMoved = true;
       clearTimeout(longPressTimer);
       longPressTimer = null;
-    }, { passive: true });
+      if (dragging) {
+        e.preventDefault(); // blocca lo scroll elastico del browser
+      }
+    };
+    div.addEventListener('touchmove', onTouchMove, { passive: false });
 
     div.addEventListener('touchend', (e) => {
       clearTimeout(longPressTimer);
@@ -1539,9 +1543,15 @@ class Inventory {
       this.g.notify(`✋ Trascina "${id}" verso lo zaino o l'altra mano.`);
     }, 350);
 
+    const onTouchMoveHand = (e) => {
+      if (dragging) e.preventDefault(); // blocca lo scroll
+    };
+    node.addEventListener('touchmove', onTouchMoveHand, { passive: false });
+
     const onEnd = (ev) => {
       clearTimeout(longPress);
       node.style.opacity = '1';
+      node.removeEventListener('touchmove', onTouchMoveHand);
       if (!dragging) return;
       const touch = ev.changedTouches[0];
       const target = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -3703,12 +3713,32 @@ window.toggleMobileInventory = () => {
   if (action) action.style.bottom = bottom;
 };
 
-// On mobile, ensure inventory starts collapsed (not hidden)
+// On mobile, ensure inventory starts collapsed (not hidden) and handle touch controls
 (function initMobileUI() {
+  const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  
+  if (isTouchDevice) {
+    // Forza la visualizzazione visiva dei controlli mobili touch a schermo
+    const ctrls = document.getElementById('mobile-ctrls');
+    const action = document.getElementById('mobile-action');
+    if (ctrls) ctrls.style.display = 'flex';
+    if (action) action.style.display = 'flex';
+
+    // Evita il trascinamento/rimbalzo generale dell'inventario su iOS Safari
+    const iv = document.getElementById('iv');
+    if (iv) {
+      iv.addEventListener('touchmove', (e) => {
+        // Permetti lo scorrimento solo se stiamo scrollando dentro la lista degli oggetti
+        const isScrollableBag = e.target.closest('#isl');
+        if (!isScrollableBag) {
+          e.preventDefault();
+        }
+      }, { passive: false });
+    }
+  }
+
   const isMobile = window.innerWidth <= 768;
   if (!isMobile) return;
-  // Listen for when inventory becomes visible (unhidden by game code)
-  // and make sure the inner wrap is scrollable
   const observer = new MutationObserver(() => {
     const iv = document.getElementById('iv');
     if (!iv) return;
