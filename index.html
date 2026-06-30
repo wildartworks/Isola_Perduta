@@ -1515,6 +1515,19 @@ class Player {
         });
         this.grp.add(this.model);
 
+        // ── LOG ALL BONES (per trovare il nome esatto della mano) ──
+        const allBones = [];
+        this.model.traverse(child => {
+          if (child.isBone) allBones.push(child.name);
+        });
+        console.log('[Player] ⬛ Tutte le ossa del modello:', allBones.join(', '));
+
+        // Salva la mappa ossa per uso futuro
+        this._boneMap = {};
+        this.model.traverse(child => {
+          if (child.isBone) this._boneMap[child.name] = child;
+        });
+
         this.mixer = new THREE.AnimationMixer(this.model);
         // Registra tutte le clip con nome originale (case‑sensitive)
         gltf.animations.forEach(clip => {
