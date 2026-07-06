@@ -2994,6 +2994,11 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
   initEditor() {
     this.edControls = new THREE.TransformControls(this.camera, this.renderer.domElement);
     this.edControls.addEventListener('change', () => this.updatePropUI());
+
+    // Stack per Undo (Ctrl+Z) delle cancellazioni in modalità EDIT
+    // Ogni voce: { obj, parent, indexInParent }
+    if (!this._undoStack) this._undoStack = [];
+
     window.addEventListener('keydown', e => {
       if(e.ctrlKey && e.key.toLowerCase() === 'e') { e.preventDefault(); this.toggleEditor(); }
       
@@ -3027,35 +3032,62 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
         }
       }
 
-      // ── Tasto CANC (Delete) in modalità EDIT → elimina oggetto selezionato ──
+      // ── Tasto CANC (Delete) in modalità EDIT → elimina oggetto con supporto Undo ──
       if (this.state === 'EDIT' && (e.key === 'Delete' || e.key === 'Canc')) {
+        e.preventDefault();
         if (this.edSelected) {
-          const obj = this.edSelected;
-          const name = obj.name || obj.type;
+          const obj    = this.edSelected;
+          const name   = obj.name || obj.type;
+          const parent = obj.parent || this.scene;
 
-          // Conferma visiva nella notifica (non interrompe il flusso)
-          this.notify(`🗑️ Oggetto eliminato: "${name}"`);
+          // Salva nella stack undo PRIMA di rimuovere (senza dispose!)
+          this._undoStack.push({ obj, parent });
 
-          // Stacca i TransformControls prima di rimuovere
+          // Limita la stack a 20 livelli per evitare memory leak
+          if (this._undoStack.length > 20) {
+            const old = this._undoStack.shift();
+            old.obj.traverse(child => {
+              if (child.isMesh) {
+                child.geometry && child.geometry.dispose();
+                if (child.material) {
+                  const mats = Array.isArray(child.material) ? child.material : [child.material];
+                  mats.forEach(m => m.dispose());
+                }
+              }
+            });
+          }
+
+          // Stacca i gizmo e deseleziona
           this.edControls.detach();
           this.edSelected = null;
 
-          // Rimuovi dalla scena e libera le risorse
-          obj.parent ? obj.parent.remove(obj) : this.scene.remove(obj);
-          obj.traverse(child => {
-            if (child.isMesh) {
-              child.geometry && child.geometry.dispose();
-              if (child.material) {
-                const mats = Array.isArray(child.material) ? child.material : [child.material];
-                mats.forEach(m => m.dispose());
-              }
-            }
-          });
+          // Rimuovi dalla scena (NON dispose — potrebbe servire per undo)
+          parent.remove(obj);
 
-          // Aggiorna la lista oggetti
+          // Aggiorna UI
           this.refreshObjList();
+          this.notify(`🗑️ "${name}" eliminato — Ctrl+Z per annullare`);
         } else {
           this.notify('⚠️ Nessun oggetto selezionato da eliminare.');
+        }
+      }
+
+      // ── Ctrl+Z in modalità EDIT → ripristina l'ultimo oggetto eliminato ──
+      if (this.state === 'EDIT' && e.ctrlKey && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (this._undoStack && this._undoStack.length > 0) {
+          const { obj, parent } = this._undoStack.pop();
+          const name = obj.name || obj.type;
+
+          // Reinserisce l'oggetto nel parent originale
+          parent.add(obj);
+
+          // Riaggiorna la lista e riseleziona l'oggetto ripristinato
+          this.refreshObjList();
+          this.selectObject(obj, obj.userData.editorLi);
+          this.notify(`↩️ Ripristinato: "${name}" — ancora ${this._undoStack.length} undo disponibili`);
+        } else {
+          this.notify('⚠️ Nessun oggetto da ripristinare (stack undo vuota).');
         }
       }
     });
