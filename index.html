@@ -866,6 +866,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
           <div class="prop-row" style="font-size:0.8rem; margin-top:5px;"><span>Walk</span>
             <select id="ed-anim-walk" style="flex:1; background:#111; border:1px solid #555; color:#fff; padding:3px;"></select>
           </div>
+          <div class="prop-row" style="font-size:0.8rem; margin-top:5px;"><span>Velocità Anim.</span>
+            <input type="number" step="0.1" min="0" max="10" id="ed-anim-speed" style="width:70px; background:#111; border:1px solid #555; color:#fff; padding:3px;" value="1.0">
+          </div>
         </div>
       </div>
     </div>
@@ -3292,9 +3295,10 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       };
     }
 
-    // Bind dropdown animazioni
+    // Bind dropdown animazioni e velocità
     const selIdle = document.getElementById('ed-anim-idle');
     const selWalk = document.getElementById('ed-anim-walk');
+    const inputSpeed = document.getElementById('ed-anim-speed');
     if (selIdle && selWalk) {
       selIdle.onchange = () => {
         if (this.edSelected && this.edSelected.userData.animMapping) {
@@ -3306,6 +3310,17 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
         if (this.edSelected && this.edSelected.userData.animMapping) {
           this.edSelected.userData.animMapping.walk = selWalk.value;
           this.playObjectAnim(this.edSelected, selWalk.value);
+        }
+      };
+    }
+    if (inputSpeed) {
+      inputSpeed.oninput = () => {
+        if (this.edSelected) {
+          const speed = parseFloat(inputSpeed.value) || 1.0;
+          this.edSelected.userData.animSpeed = speed;
+          if (this.edSelected.userData.mixer) {
+            this.edSelected.userData.mixer.timeScale = speed;
+          }
         }
       };
     }
@@ -3494,6 +3509,15 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
           selWalk.value = obj.userData.animMapping.walk || '';
         }
       }
+
+      // Mostra la velocità di animazione memorizzata (default 1.0)
+      const inputSpeed = document.getElementById('ed-anim-speed');
+      if (inputSpeed) {
+        inputSpeed.value = (obj.userData.animSpeed !== undefined) ? obj.userData.animSpeed : 1.0;
+        if (obj.userData.mixer) {
+          obj.userData.mixer.timeScale = parseFloat(inputSpeed.value);
+        }
+      }
     } else {
       if (pathLabel) pathLabel.textContent = 'Nessun modello personalizzato';
       if (animsGroup) animsGroup.style.display = 'none';
@@ -3529,7 +3553,8 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
         s: obj.scale.toArray(),
         glbUrl: obj.userData.glbUrl || null,
         glbFile: obj.userData.glbFile || null,
-        animMapping: obj.userData.animMapping || null
+        animMapping: obj.userData.animMapping || null,
+        animSpeed: (obj.userData.animSpeed !== undefined) ? obj.userData.animSpeed : 1.0
       };
     });
 
@@ -3563,6 +3588,12 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
         obj.rotation.fromArray(stateObj.r);
         obj.scale.fromArray(stateObj.s);
 
+        // Ripristina la velocità
+        obj.userData.animSpeed = (stateObj.animSpeed !== undefined) ? stateObj.animSpeed : 1.0;
+        if (obj.userData.mixer) {
+          obj.userData.mixer.timeScale = obj.userData.animSpeed;
+        }
+
         // Ricarica GLB da assets/ se l'URL è disponibile
         if (stateObj.glbUrl) {
           obj.userData.glbUrl = stateObj.glbUrl;
@@ -3571,10 +3602,15 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
           const loader = new THREE.GLTFLoader();
           const capturedObj = obj;
           const capturedMapping = stateObj.animMapping;
+          const capturedSpeed = obj.userData.animSpeed;
           loader.load(stateObj.glbUrl, (gltf) => {
             this._applyGLBToObject(gltf, capturedObj, stateObj.glbUrl);
             // Ripristina le mappature salvate sopra quelle auto-detect
             if (capturedMapping) capturedObj.userData.animMapping = capturedMapping;
+            capturedObj.userData.animSpeed = capturedSpeed;
+            if (capturedObj.userData.mixer) {
+              capturedObj.userData.mixer.timeScale = capturedSpeed;
+            }
           }, undefined, (err) => {
             console.warn('[loadEditorState] GLB non trovato:', stateObj.glbUrl, err);
           });
@@ -3754,21 +3790,31 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       if (this.scene) {
         this.scene.traverse(obj => {
           if (obj.userData && obj.userData.mixer) {
-            // Se in gioco ed ha una mappatura, riproduci l'animazione corretta basata sullo stato di movimento dell'NPC / Oggetto
+            const speed = (obj.userData.animSpeed !== undefined) ? obj.userData.animSpeed : 1.0;
+            obj.userData.mixer.timeScale = speed;
+
             if (this.state === 'PLAY') {
               if (obj.userData.animMapping) {
                 const moving = obj.userData.isMoving;
                 const targetAnim = moving ? obj.userData.animMapping.walk : obj.userData.animMapping.idle;
                 if (targetAnim) {
-                  // Avvia solo se non è già attiva
                   const action = obj.userData.clips[targetAnim];
                   if (action && !action.isRunning()) {
                     this.playObjectAnim(obj, targetAnim);
                   }
                 }
               }
-              obj.userData.mixer.update(dt);
+            } else if (this.state === 'EDIT') {
+              // In modalità EDIT, facciamo girare l'animazione idle come anteprima visiva se presente
+              if (obj.userData.animMapping && obj.userData.animMapping.idle) {
+                const targetAnim = obj.userData.animMapping.idle;
+                const action = obj.userData.clips[targetAnim];
+                if (action && !action.isRunning()) {
+                  this.playObjectAnim(obj, targetAnim);
+                }
+              }
             }
+            obj.userData.mixer.update(dt);
           }
         });
       }
