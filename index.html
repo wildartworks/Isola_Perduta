@@ -2995,9 +2995,66 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
     this.edControls = new THREE.TransformControls(this.camera, this.renderer.domElement);
     this.edControls.addEventListener('change', () => this.updatePropUI());
 
-    // Stack per Undo (Ctrl+Z) delle cancellazioni in modalità EDIT
-    // Ogni voce: { obj, parent, indexInParent }
+    // Stack per Undo (Ctrl+Z) in modalità EDIT
+    // Voci possibili:
+    // - { type: 'delete', obj, parent }
+    // - { type: 'transform', obj, position: Vector3, rotation: Euler, scale: Vector3 }
     if (!this._undoStack) this._undoStack = [];
+
+    // Variabile temporanea per lo stato precedente prima di una modifica con gizmo
+    let transformStart = null;
+
+    this.edControls.addEventListener('objectChange', () => {
+      // Invocato durante il trascinamento del gizmo per aggiornare i campi numerici
+      this.updatePropUI();
+    });
+
+    // Registra lo stato iniziale quando si clicca per trascinare il gizmo
+    this.edControls.addEventListener('mouseDown', () => {
+      if (this.edSelected) {
+        transformStart = {
+          position: this.edSelected.position.clone(),
+          rotation: this.edSelected.rotation.clone(),
+          scale: this.edSelected.scale.clone()
+        };
+      }
+    });
+
+    // Registra lo stato finale e lo inserisce nello stack di undo se è cambiato
+    this.edControls.addEventListener('mouseUp', () => {
+      if (this.edSelected && transformStart) {
+        const posChanged = !this.edSelected.position.equals(transformStart.position);
+        const rotChanged = !this.edSelected.rotation.equals(transformStart.rotation);
+        const sclChanged = !this.edSelected.scale.equals(transformStart.scale);
+
+        if (posChanged || rotChanged || sclChanged) {
+          this._undoStack.push({
+            type: 'transform',
+            obj: this.edSelected,
+            position: transformStart.position,
+            rotation: transformStart.rotation,
+            scale: transformStart.scale
+          });
+
+          // Limita la stack a 30 livelli
+          if (this._undoStack.length > 30) {
+            const discarded = this._undoStack.shift();
+            if (discarded.type === 'delete') {
+              discarded.obj.traverse(child => {
+                if (child.isMesh) {
+                  child.geometry && child.geometry.dispose();
+                  if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(m => m.dispose());
+                  }
+                }
+              });
+            }
+          }
+        }
+        transformStart = null;
+      }
+    });
 
     window.addEventListener('keydown', e => {
       if(e.ctrlKey && e.key.toLowerCase() === 'e') { e.preventDefault(); this.toggleEditor(); }
@@ -3040,28 +3097,30 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
           const name   = obj.name || obj.type;
           const parent = obj.parent || this.scene;
 
-          // Salva nella stack undo PRIMA di rimuovere (senza dispose!)
-          this._undoStack.push({ obj, parent });
+          // Salva nella stack undo come tipo 'delete'
+          this._undoStack.push({ type: 'delete', obj, parent });
 
-          // Limita la stack a 20 livelli per evitare memory leak
-          if (this._undoStack.length > 20) {
+          // Limita la stack a 30 livelli
+          if (this._undoStack.length > 30) {
             const old = this._undoStack.shift();
-            old.obj.traverse(child => {
-              if (child.isMesh) {
-                child.geometry && child.geometry.dispose();
-                if (child.material) {
-                  const mats = Array.isArray(child.material) ? child.material : [child.material];
-                  mats.forEach(m => m.dispose());
+            if (old.type === 'delete') {
+              old.obj.traverse(child => {
+                if (child.isMesh) {
+                  child.geometry && child.geometry.dispose();
+                  if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach(m => m.dispose());
+                  }
                 }
-              }
-            });
+              });
+            }
           }
 
           // Stacca i gizmo e deseleziona
           this.edControls.detach();
           this.edSelected = null;
 
-          // Rimuovi dalla scena (NON dispose — potrebbe servire per undo)
+          // Rimuovi dalla scena
           parent.remove(obj);
 
           // Aggiorna UI
@@ -3072,11 +3131,10 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
         }
       }
 
-      // ── Ctrl+Z in modalità EDIT → ripristina l'ultimo oggetto eliminato ──
+      // ── Ctrl+Z in modalità EDIT → ripristina eliminazioni o trasformazioni ──
       if (this.state === 'EDIT' && e.ctrlKey && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         if (this._undoStack && this._undoStack.length > 0) {
-          const { obj, parent } = this._undoStack.pop();
           const name = obj.name || obj.type;
 
           // Reinserisce l'oggetto nel parent originale
