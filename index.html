@@ -2775,6 +2775,13 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
   }
 
   async saveLevel() {
+    // ── Mostra dialog per scegliere il nome del file ──
+    const defaultName = `isla_level_${this.curSceneId}`;
+    const chosenName = await this._promptSaveName(defaultName);
+    if (chosenName === null) return; // utente ha annullato
+
+    const filename = (chosenName.trim() || defaultName).replace(/\.json$/i, '') + '.json';
+
     const levelData = {
       objects: [],
       camera: {
@@ -2793,50 +2800,121 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       }
     });
     const jsonStr = JSON.stringify(levelData, null, 2);
-    const defaultFilename = `isla_level_${this.curSceneId}.json`;
 
-    if (window.showDirectoryPicker) {
-      try {
-        const dirHandle = await window.showDirectoryPicker();
-        const fileHandle = await dirHandle.getFileHandle(defaultFilename, { create: true });
-        const writable = await fileHandle.createWritable();
-        await writable.write(jsonStr);
-        await writable.close();
-        this.notify('Livello salvato con successo nella cartella selezionata!');
-        return;
-      } catch(e) {
-        if (e.name === 'AbortError') return;
-        console.error("DirectoryPicker failed, falling back...", e);
-      }
-    }
-
+    // Prova prima con showSaveFilePicker (File System Access API — Chrome/Edge)
     if (window.showSaveFilePicker) {
       try {
         const handle = await window.showSaveFilePicker({
-          suggestedName: defaultFilename,
-          types: [{ description: 'JSON Livello', accept: { 'application/json': ['.json'] } }]
+          suggestedName: filename,
+          types: [{ description: 'File Livello JSON', accept: { 'application/json': ['.json'] } }]
         });
         const writable = await handle.createWritable();
         await writable.write(jsonStr);
         await writable.close();
-        this.notify('Livello salvato come JSON!');
+        this.notify(`✅ Livello salvato: ${handle.name}`);
+        return;
       } catch(e) {
-        if (e.name !== 'AbortError') {
-          console.error(e);
-          this.notify('Errore nel salvataggio del file.');
-        }
+        if (e.name === 'AbortError') return; // utente ha annullato la dialog di sistema
+        console.warn('showSaveFilePicker non disponibile, uso fallback download.', e);
       }
-    } else {
-      const blob = new Blob([jsonStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = defaultFilename;
-      a.click();
-      URL.revokeObjectURL(url);
-      this.notify('Livello salvato come JSON.');
     }
+
+    // Fallback: download automatico del file (tutti i browser)
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    this.notify(`✅ Livello salvato: ${filename}`);
   }
+
+  // Dialog interna per scegliere il nome del file prima di salvare
+  _promptSaveName(defaultName) {
+    return new Promise(resolve => {
+      // Rimuovi eventuali dialog precedenti
+      const existing = document.getElementById('save-name-dialog');
+      if (existing) existing.remove();
+
+      const overlay = document.createElement('div');
+      overlay.id = 'save-name-dialog';
+      overlay.style.cssText = `
+        position:fixed; inset:0; z-index:99999;
+        background:rgba(0,0,0,0.75); backdrop-filter:blur(4px);
+        display:flex; align-items:center; justify-content:center;
+      `;
+
+      const box = document.createElement('div');
+      box.style.cssText = `
+        background:linear-gradient(160deg,#0d1a24,#07101a);
+        border:2px solid #c8a040; border-radius:14px;
+        padding:28px 32px; min-width:360px;
+        box-shadow:0 10px 40px rgba(0,0,0,0.8), 0 0 20px rgba(200,160,64,0.2);
+        font-family:var(--fb,monospace);
+      `;
+
+      const title = document.createElement('div');
+      title.textContent = '💾 Salva Livello Come...';
+      title.style.cssText = 'color:#c8a040; font-size:1.1rem; font-weight:bold; margin-bottom:18px; letter-spacing:.05em;';
+
+      const label = document.createElement('label');
+      label.textContent = 'Nome file:';
+      label.style.cssText = 'color:#aaa; font-size:.8rem; display:block; margin-bottom:6px;';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = defaultName;
+      input.style.cssText = `
+        width:100%; box-sizing:border-box; padding:8px 12px;
+        background:#0a1520; border:1px solid #c8a040; border-radius:7px;
+        color:#ebdcb9; font-size:1rem; font-family:inherit; outline:none;
+        margin-bottom:20px;
+      `;
+
+      const hint = document.createElement('div');
+      hint.textContent = 'L\'estensione .json verrà aggiunta automaticamente.';
+      hint.style.cssText = 'color:#556; font-size:.72rem; margin-top:-14px; margin-bottom:18px;';
+
+      const btnRow = document.createElement('div');
+      btnRow.style.cssText = 'display:flex; gap:10px; justify-content:flex-end;';
+
+      const btnCancel = document.createElement('button');
+      btnCancel.textContent = 'Annulla';
+      btnCancel.style.cssText = `
+        background:rgba(255,255,255,0.05); border:1px solid #555; color:#aaa;
+        padding:7px 18px; border-radius:7px; cursor:pointer; font-size:.9rem;
+      `;
+
+      const btnSave = document.createElement('button');
+      btnSave.textContent = '💾 Salva';
+      btnSave.style.cssText = `
+        background:linear-gradient(135deg,#27ae60,#1e8449); border:none; color:#fff;
+        padding:7px 22px; border-radius:7px; cursor:pointer; font-size:.9rem; font-weight:bold;
+      `;
+
+      const close = (result) => { overlay.remove(); resolve(result); };
+
+      btnCancel.onclick = () => close(null);
+      btnSave.onclick   = () => close(input.value);
+      overlay.onclick   = (e) => { if (e.target === overlay) close(null); };
+
+      // Conferma con Invio, Annulla con Escape
+      input.onkeydown = (e) => {
+        if (e.key === 'Enter')  { e.preventDefault(); close(input.value); }
+        if (e.key === 'Escape') { e.preventDefault(); close(null); }
+      };
+
+      btnRow.append(btnCancel, btnSave);
+      box.append(title, label, input, hint, btnRow);
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+
+      // Focus e selezione del testo
+      setTimeout(() => { input.focus(); input.select(); }, 50);
+    });
+  }
+
 
   loadLevel(file) {
     const reader = new FileReader();
@@ -2926,13 +3004,11 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
           const worldPos = new THREE.Vector3();
           obj.getWorldPosition(worldPos);
 
-          // Calcola il bounding box per spostare la telecamera a una distanza adatta
           const box = new THREE.Box3().setFromObject(obj);
           const size = box.getSize(new THREE.Vector3());
           const maxDim = Math.max(size.x, size.y, size.z);
-          const distance = maxDim * 2.5 || 4; // Distanza proporzionale alla dimensione
+          const distance = maxDim * 2.5 || 4;
 
-          // Sposta la telecamera in diagonale rispetto all'oggetto
           this.camera.position.set(
             worldPos.x + distance * 0.7,
             worldPos.y + distance * 0.7,
@@ -2948,6 +3024,38 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
           this.notify(`Focus su: ${obj.name || obj.type}`);
         } else {
           this.notify("Nessun oggetto selezionato per il focus!");
+        }
+      }
+
+      // ── Tasto CANC (Delete) in modalità EDIT → elimina oggetto selezionato ──
+      if (this.state === 'EDIT' && (e.key === 'Delete' || e.key === 'Canc')) {
+        if (this.edSelected) {
+          const obj = this.edSelected;
+          const name = obj.name || obj.type;
+
+          // Conferma visiva nella notifica (non interrompe il flusso)
+          this.notify(`🗑️ Oggetto eliminato: "${name}"`);
+
+          // Stacca i TransformControls prima di rimuovere
+          this.edControls.detach();
+          this.edSelected = null;
+
+          // Rimuovi dalla scena e libera le risorse
+          obj.parent ? obj.parent.remove(obj) : this.scene.remove(obj);
+          obj.traverse(child => {
+            if (child.isMesh) {
+              child.geometry && child.geometry.dispose();
+              if (child.material) {
+                const mats = Array.isArray(child.material) ? child.material : [child.material];
+                mats.forEach(m => m.dispose());
+              }
+            }
+          });
+
+          // Aggiorna la lista oggetti
+          this.refreshObjList();
+        } else {
+          this.notify('⚠️ Nessun oggetto selezionato da eliminare.');
         }
       }
     });
