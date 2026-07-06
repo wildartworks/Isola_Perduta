@@ -82,19 +82,54 @@ class PortoScene {
       scene.add(p);
     });
 
-    // ── EDIFICIO INCLINATO ──
-    const edMat = new THREE.MeshLambertMaterial({ color: 0x1a1008 });
-    const edificio = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 2.5), edMat);
-    edificio.name = 'Edificio Porto';
-    edificio.position.set(-5.5, 1.5, -2);
-    edificio.rotation.z = -0.06;
-    scene.add(edificio);
-    const tetto = new THREE.Mesh(new THREE.ConeGeometry(2.4, 1.2, 4), new THREE.MeshLambertMaterial({ color: 0x0d0804 }));
-    tetto.name = 'Tetto Edificio Porto';
-    tetto.position.set(-5.5, 3.2, -2);
-    tetto.rotation.z = -0.06;
-    tetto.rotation.y = Math.PI / 4;
-    scene.add(tetto);
+    // ── EDIFICIO PORTO (modello 3D GLB) ──
+    const edificioLoader = new THREE.GLTFLoader();
+    edificioLoader.load(
+      'assets/Edificio_porto_01.glb',
+      (gltf) => {
+        const edificioGlb = gltf.scene;
+        edificioGlb.name = 'Edificio Porto';
+
+        // Posizione: stessa del vecchio edificio procedurale
+        edificioGlb.position.set(-5.5, 0, -2);
+
+        // Scala: regola in base alle dimensioni del tuo modello.
+        // Se appare troppo grande o piccolo, modifica questo valore.
+        edificioGlb.scale.set(1, 1, 1);
+
+        // Leggera rotazione per allinearsi al pontile inclinato
+        edificioGlb.rotation.y = 0;
+
+        // Abilita ombre su tutte le mesh del modello
+        edificioGlb.traverse(child => {
+          if (child.isMesh) {
+            child.castShadow    = true;
+            child.receiveShadow = true;
+          }
+        });
+
+        scene.add(edificioGlb);
+        console.log('[PortoScene] Edificio_porto_01.glb caricato con successo.');
+      },
+      undefined,
+      (err) => {
+        // Fallback: se il file non si carica, mostra il vecchio edificio procedurale
+        console.warn('[PortoScene] Errore caricamento Edificio_porto_01.glb, uso fallback geometrico.', err);
+        const edMat = new THREE.MeshLambertMaterial({ color: 0x1a1008 });
+        const edificio = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 2.5), edMat);
+        edificio.name = 'Edificio Porto (fallback)';
+        edificio.position.set(-5.5, 1.5, -2);
+        edificio.rotation.z = -0.06;
+        scene.add(edificio);
+        const tetto = new THREE.Mesh(new THREE.ConeGeometry(2.4, 1.2, 4), new THREE.MeshLambertMaterial({ color: 0x0d0804 }));
+        tetto.name = 'Tetto Edificio Porto (fallback)';
+        tetto.position.set(-5.5, 3.2, -2);
+        tetto.rotation.z = -0.06;
+        tetto.rotation.y = Math.PI / 4;
+        scene.add(tetto);
+      }
+    );
+
 
     // ── LANTERNE (flickering) ──
     const lanternPositions = [[-3, 1.8, 1], [0, 1.8, 1], [3, 1.8, 1]];
