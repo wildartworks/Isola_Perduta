@@ -545,11 +545,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
     width: 100%; height: 50px;
     display: flex; justify-content: center; align-items: center; gap: 15px;
     border-bottom: 1px solid #445;
+    overflow-x: auto; /* scrollabile su schermi stretti */
+    -webkit-overflow-scrolling: touch;
+    flex-shrink: 0;
   }
   #editor-topbar button {
     background: #334; border: 1px solid #556; color: #fff;
     padding: 8px 16px; border-radius: 4px; cursor: pointer;
     font-weight: bold; transition: background 0.2s;
+    white-space: nowrap; flex-shrink: 0;
+    touch-action: manipulation;
   }
   #editor-topbar button:hover { background: #445; }
   #editor-topbar button.active { background: #d35400; border-color: #e67e22; }
@@ -571,6 +576,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   #editor-obj-list li {
     padding: 8px 10px; border-bottom: 1px solid #334; cursor: pointer;
     font-size: 0.9rem; transition: background 0.2s;
+    touch-action: manipulation;
   }
   #editor-obj-list li:hover { background: #334; }
   #editor-obj-list li.selected { background: #d35400; color: white; }
@@ -588,6 +594,56 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
     padding: 4px; font-family: monospace; border-radius: 3px;
   }
   .prop-row input:focus { outline: none; border-color: #d35400; }
+
+  /* ── BARRA AZIONI TOUCH — visibile solo su mobile ── */
+  #editor-touch-bar {
+    display: none; /* nascosta su desktop, attivata via JS su touch */
+    position: fixed;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    pointer-events: auto;
+    gap: 10px;
+    align-items: center;
+    background: rgba(10,15,22,0.85);
+    border: 1px solid rgba(200,160,64,0.4);
+    border-radius: 40px;
+    padding: 8px 18px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  #editor-touch-bar button {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 1px solid #556;
+    background: #334;
+    color: #fff;
+    font-size: 1.3rem;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s, background 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #editor-touch-bar button:active { transform: scale(0.88); }
+  #ed-tb-del   { background: linear-gradient(135deg,#c0392b,#962d22) !important; border-color: #e74c3c !important; }
+  #ed-tb-undo  { background: linear-gradient(135deg,#1a5276,#2980b9) !important; border-color: #3498db !important; }
+  #ed-tb-focus { background: linear-gradient(135deg,#1e8449,#27ae60) !important; border-color: #2ecc71 !important; }
+
+  /* ── Media query mobile: pannelli laterali ridotti o nascosti ── */
+  @media (max-width: 768px) {
+    #editor-topbar { height: auto; min-height: 44px; padding: 6px 8px; gap: 6px; justify-content: flex-start; }
+    #editor-topbar button { padding: 6px 10px; font-size: 0.72rem; }
+    #editor-left { width: 160px; font-size: 0.8rem; }
+    #editor-right { width: 180px; font-size: 0.8rem; }
+    .prop-row input { padding: 3px; }
+    #editor-touch-bar { display: flex; }
+  }
+  @media (max-width: 480px) {
+    #editor-left  { display: none; } /* su schermi piccoli solo prop destra + barra touch */
+    #editor-right { width: 100%; max-width: 220px; }
+  }
 </style>
 </head>
 <body>
@@ -873,6 +929,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
       </div>
     </div>
   </div>
+
+  <!-- Barra azioni touch per modalità EDIT su mobile -->
+  <div id="editor-touch-bar">
+    <button id="ed-tb-del"   title="Elimina oggetto (CANC)">🗑️</button>
+    <button id="ed-tb-undo"  title="Annulla (Ctrl+Z)">↩️</button>
+    <button id="ed-tb-focus" title="Focus oggetto (F)">🎯</button>
+  </div>
+
   
 </div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
@@ -4020,6 +4084,47 @@ window.toggleMobileInventory = () => {
         if (!isScrollableBag) {
           e.preventDefault();
         }
+      }, { passive: false });
+    }
+
+    // ── Barra azioni touch per modalità EDIT ──
+    const touchBar    = document.getElementById('editor-touch-bar');
+    const editorUI    = document.getElementById('editor-ui');
+    const btnDel      = document.getElementById('ed-tb-del');
+    const btnUndo     = document.getElementById('ed-tb-undo');
+    const btnFocus    = document.getElementById('ed-tb-focus');
+
+    // Mostra/nascondi la barra touch insieme all'editor
+    if (touchBar && editorUI) {
+      const syncTouchBar = () => {
+        touchBar.style.display = editorUI.classList.contains('hidden') ? 'none' : 'flex';
+      };
+      const editorObserver = new MutationObserver(syncTouchBar);
+      editorObserver.observe(editorUI, { attributes: true, attributeFilter: ['class'] });
+      syncTouchBar(); // stato iniziale
+    }
+
+    // Pulsante 🗑️ DEL — simula il tasto Delete
+    if (btnDel) {
+      btnDel.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true }));
+      }, { passive: false });
+    }
+
+    // Pulsante ↩️ UNDO — simula Ctrl+Z
+    if (btnUndo) {
+      btnUndo.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }));
+      }, { passive: false });
+    }
+
+    // Pulsante 🎯 FOCUS — simula il tasto F
+    if (btnFocus) {
+      btnFocus.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'f', bubbles: true }));
       }, { passive: false });
     }
   }
