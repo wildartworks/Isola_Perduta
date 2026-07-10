@@ -832,6 +832,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   <div id="hud-btns" class="hidden" style="position:fixed;top:1rem;right:1rem;display:flex;gap:10px;z-index:70">
     <button id="sb" title="Salva Partita" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">💾</button>
     <button id="lb" title="Carica Partita" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">📂</button>
+    <button id="hud-ll" title="Carica Livello 3D (.json)" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">🛠️</button>
     <button id="mb" title="Mute" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">🔊</button>
   </div>
 
@@ -4067,6 +4068,7 @@ function bootstrap() {
   const bind = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
   bind('sb', () => { if(game) game.saveGame(); });
   bind('lb', () => { if(game) game.loadGame(); });
+  bind('hud-ll', () => { if(game) game.triggerLoadLevel(); });
   bind('mb', (e) => { if(game) { const m = game.audio.toggle(); e.target.textContent = m ? '🔇' : '🔊'; } });
   bind('restart-btn', () => location.reload());
 }
