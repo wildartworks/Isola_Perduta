@@ -4064,8 +4064,17 @@ function bootstrap() {
     }
   }, 5000);
 
-  // Eventi UI
-  const bind = (id, fn) => { const el = document.getElementById(id); if(el) el.onclick = fn; };
+  // Eventi UI (supporta click e tocco immediato su mobile)
+  const bind = (id, fn) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const handler = (e) => {
+      e.preventDefault();
+      fn(e);
+    };
+    el.addEventListener('click', handler);
+    el.addEventListener('touchend', handler, { passive: false });
+  };
   bind('sb', () => { if(game) game.saveGame(); });
   bind('lb', () => { if(game) game.loadGame(); });
   bind('hud-ll', () => { if(game) game.triggerLoadLevel(); });
