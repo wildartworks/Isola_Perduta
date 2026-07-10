@@ -265,6 +265,18 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
     pointer-events:auto;
     user-select:none;
   }
+  /* Miniatura personaggio nel tab collassato */
+  #iv-tab-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 8px rgba(200,160,64,0.5);
+    display: none; /* visibile solo quando un personaggio è selezionato */
+    flex-shrink: 0;
+  }
+  #iv-tab-avatar.visible { display: block; }
   #iv-toggle-btn::before{
     content:'🎒 ZAINO / PROVVISTE';
   }
@@ -291,7 +303,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   }
   .iv-sec{flex:1;min-width:110px;padding:6px}
   #iv-port{width:auto;flex:1}
-  #iv-face{width:46px;height:50px;font-size:2.2rem}
+  #iv-face{
+    width:56px; height:62px;
+    font-size:2.2rem;
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 10px rgba(200,160,64,0.35);
+    overflow: hidden;
+    border-radius: 6px;
+  }
   #iv-name{font-size:.75rem}
   .iv-title{font-size:.7rem;margin-bottom:3px}
   #isl{grid-template-columns:repeat(5,1fr);gap:5px}
@@ -453,8 +472,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   .ie{font-size:1.2rem!important}
   .iv-slot{width:38px!important; height:38px!important}
   .iv-hands{justify-content:center!important; gap:6px!important}
-  /* Nascondi ritratto personaggio per risparmiare spazio */
-  #iv-port{display:none!important}
+  /* Landscape: mostra solo mini-avatar + nome nel pannello laterale */
+  #iv-port{
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    gap:6px!important;
+    padding:4px!important;
+  }
+  #iv-face{width:32px!important; height:32px!important; font-size:1.4rem!important; border-radius:50%!important;}
+  #iv-face img{ border-radius:50%!important; }
 
   /* D-pad: più piccolo, in basso a sinistra sopra i controlli */
   #mobile-ctrls{
@@ -759,7 +786,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   <!-- INVENTORY -->
   <div id="iv" class="hidden">
     <!-- Mobile toggle tab (hidden on desktop via CSS) -->
-    <button id="iv-toggle-btn" style="display:none;" onclick="toggleMobileInventory()" aria-label="Apri/chiudi zaino"></button>
+    <button id="iv-toggle-btn" style="display:none;" onclick="toggleMobileInventory()" aria-label="Apri/chiudi zaino">
+      <img id="iv-tab-avatar" src="" alt="Personaggio" />
+    </button>
     <!-- Main content wrapper -->
     <div id="iv-inner-wrap">
       <div class="iv-sec" id="iv-port">
@@ -2263,6 +2292,12 @@ class Game {
     document.getElementById('card-' + id).classList.add('selected');
     if (data.avatar) {
       document.getElementById('iv-face').innerHTML = `<img src="${data.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" />`;
+      // Aggiorna la miniatura nel tab mobile dello zaino
+      const tabAvatar = document.getElementById('iv-tab-avatar');
+      if (tabAvatar) {
+        tabAvatar.src = data.avatar;
+        tabAvatar.classList.add('visible');
+      }
     } else {
       document.getElementById('iv-face').textContent = data.emoji;
     }
