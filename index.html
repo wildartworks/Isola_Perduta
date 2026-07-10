@@ -247,13 +247,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   }
   #iv.hidden{transform:translateY(100%);pointer-events:none}
   #iv.iv-open{height:220px}
-
   /* Toggle tab inside inventory */
   #iv-toggle-btn{
     display:flex!important;
     width:100%; height:52px;
     align-items:center; justify-content:center;
-    gap:8px;
+    gap:12px;
     background:transparent;
     border:none;
     cursor:pointer;
@@ -267,8 +266,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   }
   /* Miniatura personaggio nel tab collassato */
   #iv-tab-avatar {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--gold);
@@ -278,17 +277,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   }
   #iv-tab-avatar.visible { display: block; }
   #iv-toggle-btn::before{
-    content:'🎒 ZAINO / PROVVISTE';
+    content:'🎒 ZAINO';
   }
   #iv.iv-open #iv-toggle-btn::before{
-    content:'▼ ZAINO / PROVVISTE';
+    content:'▼ ZAINO';
   }
   #iv-toggle-btn::after{
     content:'▲';
     font-size:.7rem;
+    margin-left: 6px;
   }
   #iv.iv-open #iv-toggle-btn::after{
     content:'▼';
+    margin-left: 6px;
   }
 
   /* Scrollable content inside expanded inventory */
