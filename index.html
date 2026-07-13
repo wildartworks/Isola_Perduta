@@ -1561,15 +1561,17 @@ class Inventory {
             const memP2 = this.g.memory / 100;
             const dn2   = (memP2 < 0.4 && itemDef.nameCorrupt) ? itemDef.nameCorrupt : itemDef.name;
             let extraActionHtml = '';
-            if (isProvvista) extraActionHtml = ` <button id="use-item-btn" style="background:#27ae60;border:none;color:white;padding:4px 10px;border-radius:4px;cursor:pointer;font-weight:bold;margin-right:5px;font-family:var(--fb);font-size:0.85rem;box-shadow:0 0 5px rgba(39,174,96,0.5);">CONSUMA</button>`;
+            if (isProvvista) extraActionHtml = ` <button id="use-item-btn" style="background:#27ae60;border:none;color:white;padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:bold;margin-right:5px;font-family:var(--fb);font-size:0.9rem;box-shadow:0 0 5px rgba(39,174,96,0.5);touch-action:manipulation;-webkit-tap-highlight-color:transparent;">CONSUMA</button>`;
             let fullMsg = `${itemDef.emoji} <strong>${dn2}</strong>: ${itemDef.desc || ''}`;
             if (itemDef.hint) fullMsg += `<div style="margin-top:10px;padding:10px;background:rgba(200,160,64,0.12);border-left:4px solid var(--gold);border-radius:4px;font-size:0.92rem;color:#ebdcb9;font-family:var(--fb);line-height:1.45;text-align:left;box-sizing:border-box;">💡 <em>${itemDef.hint}</em></div>`;
             this.g.notify(fullMsg, true, () => {
               if (isProvvista) {
                 const useBtn = document.getElementById('use-item-btn');
                 if (useBtn) {
-                  useBtn.onclick = (ev) => {
+                  // Handler unico riusabile per click e touch
+                  const consumeHandler = (ev) => {
                     ev.stopPropagation();
+                    ev.preventDefault();
                     const restoreMap = { pesce_essiccato:[40,'🐟 Mangiato Pesce Essiccato (+40% Salute)',450], acqua_dolce:[50,'🥛 Bevuto Acqua Dolce (+50% Salute)',500], mango_fluorescente:[40,'🟢 Mangiato Mango Fluorescente (+40% Salute)',450] };
                     const r = restoreMap[id];
                     if (r) {
@@ -1584,6 +1586,8 @@ class Inventory {
                       }
                     }
                   };
+                  useBtn.addEventListener('click',    consumeHandler);
+                  useBtn.addEventListener('touchend', consumeHandler, { passive: false });
                 }
               }
             }, extraActionHtml);
@@ -1721,13 +1725,48 @@ class Inventory {
 
       if (tapMoved || longPressTimer === null) return; // ignore swipe or expired timer
 
-      // ── Tap breve → selezione per equipaggiamento (oppure azione immediata se mappa/diario) ──
+      // ── Tap breve: azione diretta per item speciali, oppure selezione equipaggiamento ──
+      // Nota: gestiamo qui i consumabili direttamente per garantire risposta immediata su iOS/Android
+      // (il click sintetico post-touchend può non attivarsi su alcuni browser mobile)
       if (id === 'mappa_bagnata') {
         this.g.openMap();
       } else if (id === 'mappa_strappata') {
         this.g.openImageOverlay('assets/frammento_mappa_pip.png');
       } else if (id === 'diario_incompleto') {
         this.g.openImageOverlay('assets/pagina_diario.webp');
+      } else if (id === 'pesce_essiccato' || id === 'acqua_dolce' || id === 'mango_fluorescente') {
+        // Consumabili: mostra subito descrizione + tasto CONSUMA (non aspettare il click sintetico)
+        const itemDef = (GAME_DATA && GAME_DATA.items[id]) || { emoji: '?', name: id, desc: '' };
+        const memPct = this.g.memory / 100;
+        const dn = (memPct < 0.4 && itemDef.nameCorrupt) ? itemDef.nameCorrupt : itemDef.name;
+        let fullMsg = `${itemDef.emoji} <strong>${dn}</strong>: ${itemDef.desc || ''}`;
+        if (itemDef.hint) fullMsg += `<div style="margin-top:10px;padding:10px;background:rgba(200,160,64,0.12);border-left:4px solid var(--gold);border-radius:4px;font-size:0.92rem;color:#ebdcb9;font-family:var(--fb);line-height:1.45;text-align:left;box-sizing:border-box;">💡 <em>${itemDef.hint}</em></div>`;
+        const extraHtml = `<button id="use-item-btn" style="background:#27ae60;border:none;color:white;padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:bold;margin-right:5px;font-family:var(--fb);font-size:0.9rem;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">CONSUMA</button>`;
+        this.g.notify(fullMsg, true, () => {
+          const useBtn = document.getElementById('use-item-btn');
+          if (useBtn) {
+            const consumeHandler = (ev) => {
+              ev.stopPropagation();
+              ev.preventDefault();
+              const restoreMap = { pesce_essiccato:[40,'🐟 Mangiato Pesce Essiccato (+40% Salute)',450], acqua_dolce:[50,'🥛 Bevuto Acqua Dolce (+50% Salute)',500], mango_fluorescente:[40,'🟢 Mangiato Mango Fluorescente (+40% Salute)',450] };
+              const r = restoreMap[id];
+              if (r) {
+                this.g.updateHealth(r[0]);
+                this.rem(id);
+                this.g.notify(r[1]);
+                this.g.audio.playTone(r[2], 'sine', 0.2, 0.1);
+                // ── Avanza il tutorial QuestScene: mango consumato → step 4 ──
+                if (id === 'mango_fluorescente' && this.g.curScene && this.g.curScene.tutorialStep === 3) {
+                  this.g.curScene.tutorialStep = 4;
+                  setTimeout(() => this.g.notify('✅ Ottimo! Ora torna a parlare con il Vecchio Saggio.'), 600);
+                }
+              }
+            };
+            useBtn.addEventListener('click',    consumeHandler);
+            useBtn.addEventListener('touchend', consumeHandler, { passive: false });
+          }
+        }, extraHtml);
+        this.g.audio.playClick();
       } else {
         if (this._pendingEquip === id) {
           // Secondo tap sullo stesso oggetto → deseleziona
