@@ -60,6 +60,9 @@ const GAME_DATA = {
     arpione_cerimoniale:  { id:'arpione_cerimoniale',  name:'Arpione Cerimoniale',      nameCorrupt:'Lancia di pietra',emoji:'🔱', desc:'Un arpione decorativo inciso con simboli che non conosci. Troppo prezioso per combattere.', hint:'I simboli incisi corrispondono a quelli sulle pareti del tempio. Potrebbe essere una chiave.' },
     libro_impermeabile:   { id:'libro_impermeabile',   name:'Libro Impermeabile',       nameCorrupt:'Pietra con segni',emoji:'📖', desc:'Pagine di pietra sottile. L\'ultima scritta dice: "L\'isola non è naturale. È una gigantesca macchina costruita per conservare ricordi."', hint:'La grande rivelazione è in questo libro. Leggilo prima di affrontare la statua parlante.' },
     medaglione_spezzato:  { id:'medaglione_spezzato',  name:'Medaglione Spezzato',      nameCorrupt:'Cerchio rotto',   emoji:'🪬', desc:'Metà di un medaglione antico. L\'altra metà è incisa su ogni statua della città. Chi lo ha perso non è mai tornato.', hint:'Se ritrovi l\'altra metà sulle statue, il medaglione completo potrebbe aprire qualcosa di importante.' },
+
+    // ── LIVELLO QUEST (Tutorial) ──
+    chiave_arrugginita:   { id:'chiave_arrugginita',   name:'Chiave Arrugginita',       nameCorrupt:'Ferro storto',    emoji:'🟤', desc:'Una vecchia chiave di ferro arrugginita nascosta sotto le pietre. Qualcuno la voleva nascosta.', hint:'Usala trascinandola sullo scrigno del tesoro per aprirlo.' },
   },
 
   // ── DIALOGHI LIVELLO 1 — IL PORTO DELLE MAREE MORTE ──

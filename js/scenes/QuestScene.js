@@ -262,9 +262,9 @@ class QuestScene {
     const chestObj = this.objs.find(o => o.mesh === this.chestMesh);
     if (chestObj) {
       chestObj.onDrop = (itemId) => {
-        if (itemId === 'bussola_rotta') { // Useremo bussola_rotta come "chiave" temporanea di tutorial per non confondere
-          if (this.tutorialStep === 6 || g.inv.has('bussola_rotta')) {
-            g.inv.rem('bussola_rotta');
+        if (itemId === 'chiave_arrugginita') {
+          if (this.tutorialStep === 6 || g.inv.has('chiave_arrugginita')) {
+            g.inv.rem('chiave_arrugginita');
             g._chestOpened = true;
             this._chestOpened = true;
             g.notify("🔓 Lo scrigno si apre! Hai completato la quest di prova!");
@@ -295,11 +295,14 @@ class QuestScene {
     this.keyMesh.position.set(-3, 0.15, -4);
     scene.add(this.keyMesh);
 
-    this.addClickable(this.keyMesh, '🔑 Raccogli Chiave di Prova', { x: -2.5, z: -4 }, () => {
-      g.inv.add('bussola_rotta'); // riusa bussola_rotta come chiave per evitare collisioni inventario
-      g.notify("Hai raccolto la Chiave di Prova!");
+    this.addClickable(this.keyMesh, '🔑 Raccogli Chiave Arrugginita', { x: -2.5, z: -4 }, () => {
+      g.inv.add('chiave_arrugginita');
+      g.notify("🔑 Hai raccolto la Chiave Arrugginita! Trascinala sullo scrigno.");
       scene.remove(this.keyMesh);
       this.objs = this.objs.filter(o => o.mesh !== this.keyMesh);
+      if (this.tutorialStep === 6) {
+        setTimeout(() => g.notify("💡 Apri lo zaino, tieni premuto la chiave e trascinala sullo scrigno."), 800);
+      }
     });
   }
 
