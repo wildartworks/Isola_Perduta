@@ -3032,13 +3032,9 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
   }
 
   async saveLevel() {
-    // ── Mostra dialog per scegliere il nome del file ──
     const defaultName = `isla_level_${this.curSceneId}`;
-    const chosenName = await this._promptSaveName(defaultName);
-    if (chosenName === null) return; // utente ha annullato
-
-    const filename = (chosenName.trim() || defaultName).replace(/\.json$/i, '') + '.json';
-
+    
+    // Costruiamo i dati prima
     const levelData = {
       objects: [],
       camera: {
@@ -3058,37 +3054,44 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
     });
     const jsonStr = JSON.stringify(levelData, null, 2);
 
-    // Prova prima con showSaveFilePicker (File System Access API — Chrome/Edge)
-    if (window.showSaveFilePicker) {
-      try {
-        const handle = await window.showSaveFilePicker({
-          suggestedName: filename,
-          types: [{ description: 'File Livello JSON', accept: { 'application/json': ['.json'] } }]
-        });
-        const writable = await handle.createWritable();
-        await writable.write(jsonStr);
-        await writable.close();
-        this.notify(`✅ Livello salvato: ${handle.name}`);
-        return;
-      } catch(e) {
-        if (e.name === 'AbortError') return; // utente ha annullato la dialog di sistema
-        console.warn('showSaveFilePicker non disponibile, uso fallback download.', e);
-      }
-    }
+    // Chiamiamo _promptSaveName passando la callback sincrona di salvataggio
+    await this._promptSaveName(defaultName, async (chosenName) => {
+      if (!chosenName) return;
+      const filename = chosenName.replace(/\.json$/i, '') + '.json';
 
-    // Fallback: download automatico del file (tutti i browser)
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-    this.notify(`✅ Livello salvato: ${filename}`);
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: filename,
+            types: [{ description: 'File Livello JSON', accept: { 'application/json': ['.json'] } }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(jsonStr);
+          await writable.close();
+          this.notify(`✅ Livello salvato: ${handle.name}`);
+          return;
+        } catch(e) {
+          if (e.name === 'AbortError') return;
+          console.warn('showSaveFilePicker fallito, uso fallback.', e);
+        }
+      }
+
+      // Fallback: download automatico del file
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      this.notify('Livello scaricato (download avviato).');
+    });
   }
 
+
   // Dialog interna per scegliere il nome del file prima di salvare
-  _promptSaveName(defaultName) {
+  // Dialog interna per scegliere il nome del file prima di salvare
+  _promptSaveName(defaultName, saveAction = null) {
     return new Promise(resolve => {
       // Rimuovi eventuali dialog precedenti
       const existing = document.getElementById('save-name-dialog');
@@ -3112,7 +3115,7 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       `;
 
       const title = document.createElement('div');
-      title.textContent = '💾 Salva Livello Come...';
+      title.textContent = '💾 Salva File Come...';
       title.style.cssText = 'color:#c8a040; font-size:1.1rem; font-weight:bold; margin-bottom:18px; letter-spacing:.05em;';
 
       const label = document.createElement('label');
@@ -3152,13 +3155,25 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
 
       const close = (result) => { overlay.remove(); resolve(result); };
 
+      const handleConfirm = async () => {
+        const val = input.value;
+        if (saveAction) {
+          try {
+            await saveAction(val);
+          } catch (e) {
+            console.error("Save action failed", e);
+          }
+        }
+        close(val);
+      };
+
       btnCancel.onclick = () => close(null);
-      btnSave.onclick   = () => close(input.value);
+      btnSave.onclick   = () => handleConfirm();
       overlay.onclick   = (e) => { if (e.target === overlay) close(null); };
 
       // Conferma con Invio, Annulla con Escape
       input.onkeydown = (e) => {
-        if (e.key === 'Enter')  { e.preventDefault(); close(input.value); }
+        if (e.key === 'Enter')  { e.preventDefault(); handleConfirm(); }
         if (e.key === 'Escape') { e.preventDefault(); close(null); }
       };
 
@@ -3171,6 +3186,7 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       setTimeout(() => { input.focus(); input.select(); }, 50);
     });
   }
+
 
 
   loadLevel(file) {
@@ -3884,33 +3900,38 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
   }
 
   async saveGame() {
-    const filename = `isla_save_${this.charId || 'giocatore'}_${this.curSceneId}.json`;
+    const defaultSaveName = `isla_save_${this.charId || 'giocatore'}_${this.curSceneId}`;
     const data = { memory: this.memory, health: this.health, charId: this.charId, flags: this.flags, items: this.inv.items, curSceneId: this.curSceneId };
     const jsonStr = JSON.stringify(data, null, 2);
 
-    if (window.showSaveFilePicker) {
-      try {
-        const options = {
-          suggestedName: filename,
-          types: [{
-            description: 'Salvataggio Isla Perduta',
-            accept: {
-              'application/json': ['.json'],
-            },
-          }],
-        };
-        const handle = await window.showSaveFilePicker(options);
-        const writable = await handle.createWritable();
-        await writable.write(jsonStr);
-        await writable.close();
-        this.notify("Partita salvata con successo!");
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.error(err);
-          this.notify("Errore nel salvataggio del file.");
+    // Chiamiamo _promptSaveName passando la callback sincrona di salvataggio
+    await this._promptSaveName(defaultSaveName, async (chosenName) => {
+      if (!chosenName) return;
+      const filename = chosenName.replace(/\.json$/i, '') + '.json';
+
+      if (window.showSaveFilePicker) {
+        try {
+          const options = {
+            suggestedName: filename,
+            types: [{
+              description: 'Salvataggio Isla Perduta',
+              accept: {
+                'application/json': ['.json'],
+              },
+            }],
+          };
+          const handle = await window.showSaveFilePicker(options);
+          const writable = await handle.createWritable();
+          await writable.write(jsonStr);
+          await writable.close();
+          this.notify("Partita salvata con successo!");
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+          console.error("showSaveFilePicker fallito, uso fallback.", err);
         }
       }
-    } else {
+
       // Fallback per browser che non supportano showSaveFilePicker (es. Safari mobile)
       const blob = new Blob([jsonStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -3918,10 +3939,11 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       a.href = url;
       a.download = filename;
       a.click();
-      this.notify("Partita salvata (download avviato)!");
       URL.revokeObjectURL(url);
-    }
+      this.notify("Partita salvata (download avviato)!");
+    });
   }
+
 
 
 
@@ -4274,13 +4296,15 @@ function bootstrap() {
   const bind = (id, fn) => {
     const el = document.getElementById(id);
     if (!el) return;
-    const handler = (e) => {
+    el.addEventListener('click', (e) => {
+      fn(e);
+    });
+    el.addEventListener('touchend', (e) => {
       e.preventDefault();
       fn(e);
-    };
-    el.addEventListener('click', handler);
-    el.addEventListener('touchend', handler, { passive: false });
+    }, { passive: false });
   };
+
   bind('iv-btn-save', () => { if(game) game.saveGame(); });
   bind('iv-btn-load', () => { if(game) game.loadGame(); });
   bind('hud-ll', () => { if(game) game.triggerLoadLevel(); });
