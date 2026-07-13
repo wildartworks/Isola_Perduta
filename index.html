@@ -3878,28 +3878,26 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
   }
 
   async saveGame() {
+    const defaultSaveName = `isla_save_${this.charId || 'giocatore'}_${this.curSceneId}`;
+    let chosenName = null;
+    
+    // Usa lo stesso prompt personalizzato dell'editor se disponibile, altrimenti un prompt standard
+    if (typeof this._promptSaveName === 'function') {
+      chosenName = await this._promptSaveName(defaultSaveName);
+    } else {
+      chosenName = prompt("Inserisci il nome del file di salvataggio:", defaultSaveName);
+    }
+    
+    if (chosenName === null) return; // annullato
+    const filename = (chosenName.trim() || defaultSaveName).replace(/\.json$/i, '') + '.json';
+
     const data = { memory: this.memory, health: this.health, charId: this.charId, flags: this.flags, items: this.inv.items, curSceneId: this.curSceneId };
     const jsonStr = JSON.stringify(data, null, 2);
-
-    if (window.showDirectoryPicker) {
-      try {
-        const dirHandle = await window.showDirectoryPicker();
-        const fileHandle = await dirHandle.getFileHandle('isla_perduta_save.json', { create: true });
-        const writable = await fileHandle.createWritable();
-        await writable.write(jsonStr);
-        await writable.close();
-        this.notify("Partita salvata con successo nella cartella selezionata!");
-        return;
-      } catch (err) {
-        if (err.name === 'AbortError') return;
-        console.error("DirectoryPicker failed, falling back...", err);
-      }
-    }
 
     if (window.showSaveFilePicker) {
       try {
         const options = {
-          suggestedName: 'isla_perduta_save.json',
+          suggestedName: filename,
           types: [{
             description: 'Salvataggio Isla Perduta',
             accept: {
@@ -3919,19 +3917,18 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
         }
       }
     } else {
+      // Fallback per browser che non supportano showSaveFilePicker (es. Safari mobile)
       const blob = new Blob([jsonStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const filename = prompt("Inserisci il nome per il file di salvataggio:", "isla_perduta_save.json");
-      if (filename) {
-        a.download = filename.endsWith('.json') ? filename : filename + '.json';
-        a.click();
-        this.notify("Partita salvata (download avviato)!");
-      }
+      a.download = filename;
+      a.click();
+      this.notify("Partita salvata (download avviato)!");
       URL.revokeObjectURL(url);
     }
   }
+
 
   loadGame() {
     const input = document.createElement('input');
