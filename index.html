@@ -197,10 +197,44 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   cursor: pointer;
   box-shadow: 0 4px 8px rgba(0,0,0,0.5);
   transition: transform 0.2s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 #exit-quest-btn:hover {
   transform: scale(1.05);
 }
+
+/* Tasti Salva/Carica Partita dentro l'inventario */
+#iv-game-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+}
+#iv-btn-save,
+#iv-btn-load {
+  flex: 1;
+  font-family: var(--ft);
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 0.3em 0.5em;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid rgba(200,160,64,0.4);
+  transition: transform 0.15s, background 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+#iv-btn-save {
+  background: linear-gradient(135deg, #1a5a2a, #2a8a4a);
+  color: #fff;
+}
+#iv-btn-load {
+  background: linear-gradient(135deg, #1a3a6a, #2a6aaa);
+  color: #fff;
+}
+#iv-btn-save:hover, #iv-btn-load:hover { transform: scale(1.04); }
+
 
 /* Piccolo tasto EXIT mobile, visibile solo su touch devices */
 #mobile-exit-btn {
@@ -382,9 +416,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
     50%      { box-shadow: 0 0 18px rgba(231,76,60,0.9); }
   }
 
+  /* Bottoni Salva/Carica compatti dentro l'inventario su mobile portrait */
+  #iv-btn-save, #iv-btn-load {
+    font-size: 0.72rem !important;
+    padding: 0.25em 0.4em !important;
+  }
   #exit-quest-btn {
-    right: 15px !important;
-    bottom: 120px !important;
+    font-size: 0.82rem !important;
+    padding: 0.25em 1em !important;
   }
 
   .tbo{background:radial-gradient(ellipse at 50% 50%,#1f0e00,#000 80%)}
@@ -483,6 +522,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
   }
   #iv-face{width:32px!important; height:32px!important; font-size:1.4rem!important; border-radius:50%!important;}
   #iv-face img{ border-radius:50%!important; }
+  /* Bottoni Salva/Carica e EXIT compatti nel pannello laterale landscape */
+  #exit-quest-btn {
+    font-size: 0.7rem !important;
+    padding: 0.2em 0.8em !important;
+    margin-top: 6px !important;
+    border-radius: 10px !important;
+  }
+  #iv-game-actions { gap: 4px !important; margin-top: 4px !important; }
+  #iv-btn-save, #iv-btn-load {
+    font-size: 0.65rem !important;
+    padding: 0.2em 0.3em !important;
+    border-radius: 8px !important;
+  }
 
   /* D-pad: più piccolo, in basso a sinistra sopra i controlli */
   #mobile-ctrls{
@@ -821,19 +873,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
         <div class="iv-title">Zaino / Provviste</div>
         <div id="isl"></div>
       </div>
-      <!-- EXIT BUTTON MOVED HERE -->
-      <button id="exit-quest-btn" title="Exit to Menu" onclick="window.exitQuestLevel()">EXIT (Torna al Menu)</button>
+      <!-- EXIT BUTTON + SALVA/CARICA PARTITA DENTRO L'INVENTARIO -->
+      <div style="width:100%; padding: 0 4px 4px;">
+        <button id="exit-quest-btn" title="Exit to Menu" onclick="window.exitQuestLevel()">EXIT (Torna al Menu)</button>
+        <div id="iv-game-actions">
+          <button id="iv-btn-save" title="Salva Partita">💾 Salva</button>
+          <button id="iv-btn-load" title="Carica Partita">📂 Carica</button>
+        </div>
+      </div>
     </div>
   </div>
   <!-- NOTIFICATION -->
   <div id="nt"></div>
 
-  <!-- HUD BUTTONS -->
+  <!-- HUD BUTTONS (solo Carica Livello e Mute) -->
   <div id="hud-btns" class="hidden" style="position:fixed;top:1rem;right:1rem;display:flex;gap:10px;z-index:70">
-    <button id="sb" title="Salva Partita" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">💾</button>
-    <button id="lb" title="Carica Partita" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">📂</button>
-    <button id="hud-ll" title="Carica Livello 3D (.json)" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">🛠️</button>
-    <button id="mb" title="Mute" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s">🔊</button>
+    <button id="hud-ll" title="Carica Livello 3D (.json)" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s;touch-action:manipulation;">🛠️</button>
+    <button id="mb" title="Mute" style="font-size:1.4rem;background:rgba(0,0,0,.5);border:1px solid rgba(240,192,64,.3);border-radius:50%;width:40px;height:40px;cursor:pointer;transition:background .2s;touch-action:manipulation;">🔊</button>
   </div>
 
   <!-- Piccolo EXIT per mobile (fuori dall'inventario) -->
@@ -4075,8 +4131,8 @@ function bootstrap() {
     el.addEventListener('click', handler);
     el.addEventListener('touchend', handler, { passive: false });
   };
-  bind('sb', () => { if(game) game.saveGame(); });
-  bind('lb', () => { if(game) game.loadGame(); });
+  bind('iv-btn-save', () => { if(game) game.saveGame(); });
+  bind('iv-btn-load', () => { if(game) game.loadGame(); });
   bind('hud-ll', () => { if(game) game.triggerLoadLevel(); });
   bind('mb', (e) => { if(game) { const m = game.audio.toggle(); e.target.textContent = m ? '🔇' : '🔊'; } });
   bind('restart-btn', () => location.reload());
