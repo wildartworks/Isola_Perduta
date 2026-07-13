@@ -2503,7 +2503,9 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       if (this.audio) this.audio.playPickup();
     }
     this.updateHealth(0);
+    this.updateMemory(0);
   }
+
 
   handleAction(action) {
     if(action === 'LEVEL1_WIN') this.win_level1();
@@ -2574,6 +2576,15 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       this.die();
     }
   }
+
+  updateMemory(amount) {
+    this.memory = Math.max(0, Math.min(100, this.memory + amount));
+    const mb = document.getElementById('memory-bar');
+    if (mb) mb.style.width = this.memory + '%';
+    const mf = document.getElementById('memory-fill');
+    if (mf) mf.style.width = this.memory + '%';
+  }
+
 
   die() {
     this.state = 'DEAD';
@@ -3974,7 +3985,9 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
               }
               this.startGame();
               this.updateHealth(0); // Aggiorna barra salute
+              this.updateMemory(0); // Aggiorna barra memoria
               this.notify("Partita Caricata dal file!");
+
             } else {
               this.notify("File di salvataggio non valido.");
             }
@@ -4022,8 +4035,10 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
     if(this.state === 'PLAY' || this.state === 'DIALOG' || this.state === 'EDIT') {
       if(this.player && this.state === 'PLAY') {
         this.player.update(dt, this.keys);
-        this.updateHealth(-0.15 * dt); // depletes 1 point every ~6.6 seconds (approx 11 minutes total)
+        this.updateHealth(-0.03 * dt); // consumo lento (circa 55 minuti totali di autonomia)
+        this.updateMemory(-0.02 * dt); // consumo lento (circa 80 minuti totali di autonomia)
         if(this.pendingAction) {
+
           // Se è un'azione verso un NPC, aggiorna il target in tempo reale (l'NPC si muove)
           if (this.pendingAction.npcRef) {
             const npc = this.pendingAction.npcRef;
