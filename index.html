@@ -3884,19 +3884,7 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
   }
 
   async saveGame() {
-    const defaultSaveName = `isla_save_${this.charId || 'giocatore'}_${this.curSceneId}`;
-    let chosenName = null;
-    
-    // Usa lo stesso prompt personalizzato dell'editor se disponibile, altrimenti un prompt standard
-    if (typeof this._promptSaveName === 'function') {
-      chosenName = await this._promptSaveName(defaultSaveName);
-    } else {
-      chosenName = prompt("Inserisci il nome del file di salvataggio:", defaultSaveName);
-    }
-    
-    if (chosenName === null) return; // annullato
-    const filename = (chosenName.trim() || defaultSaveName).replace(/\.json$/i, '') + '.json';
-
+    const filename = `isla_save_${this.charId || 'giocatore'}_${this.curSceneId}.json`;
     const data = { memory: this.memory, health: this.health, charId: this.charId, flags: this.flags, items: this.inv.items, curSceneId: this.curSceneId };
     const jsonStr = JSON.stringify(data, null, 2);
 
@@ -3934,6 +3922,7 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       URL.revokeObjectURL(url);
     }
   }
+
 
 
   loadGame() {
