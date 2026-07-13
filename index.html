@@ -2434,13 +2434,15 @@ class Game {
     document.getElementById('char-select').classList.remove('hidden');
   }
 
-  selectChar(id) {
+  selectChar(id, silent = false) {
     this.charId = id;
     const data = GAME_DATA.characters[id];
     document.querySelectorAll('.cs-card').forEach(c => c.classList.remove('selected'));
-    document.getElementById('card-' + id).classList.add('selected');
+    const card = document.getElementById('card-' + id);
+    if (card) card.classList.add('selected');
     if (data.avatar) {
-      document.getElementById('iv-face').innerHTML = `<img src="${data.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" />`;
+      const face = document.getElementById('iv-face');
+      if (face) face.innerHTML = `<img src="${data.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;" />`;
       // Aggiorna la miniatura nel tab mobile dello zaino
       const tabAvatar = document.getElementById('iv-tab-avatar');
       if (tabAvatar) {
@@ -2448,15 +2450,19 @@ class Game {
         tabAvatar.classList.add('visible');
       }
     } else {
-      document.getElementById('iv-face').textContent = data.emoji;
+      const face = document.getElementById('iv-face');
+      if (face) face.textContent = data.emoji;
     }
-    document.getElementById('iv-name').innerHTML = data.name.replace(' ', '<br>');
+    const nameEl = document.getElementById('iv-name');
+    if (nameEl) nameEl.innerHTML = data.name.replace(' ', '<br>');
     
-    // Transizione alla schermata del menu con sfondo Menu_01.png
-    setTimeout(() => {
-      document.getElementById('char-select').classList.add('hidden');
-      document.getElementById('game-menu').classList.remove('hidden');
-    }, 500);
+    if (!silent) {
+      // Transizione alla schermata del menu con sfondo Menu_01.png
+      setTimeout(() => {
+        document.getElementById('char-select').classList.add('hidden');
+        document.getElementById('game-menu').classList.remove('hidden');
+      }, 500);
+    }
   }
 
   startDialog(id, nodes, startNodeId = 'start') {
@@ -3948,8 +3954,13 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
               this.flags = d.flags || {};
               this.inv.items = d.items || Array(12).fill(null);
               this.inv.render();
-              this.selectChar(this.charId);
+              this.selectChar(this.charId, true);
               this.curSceneId = d.curSceneId || 'porto';
+              // Pulisce e resetta lo stato della scena precedente se attiva
+              if (this.scene) {
+                THREE.Cache.clear();
+                this.scene.clear();
+              }
               this.startGame();
               this.updateHealth(0); // Aggiorna barra salute
               this.notify("Partita Caricata dal file!");
