@@ -1642,7 +1642,8 @@ class Inventory {
         this._startTouchDrag(id, 'bag', { slotIdx });
         div.style.opacity = '0.5';
         this._clearPendingEquip();
-        this.g.notify(`📦 Trascina "${id}" verso una mano.`);
+        const itemName = (GAME_DATA.items[id]?.name) || id;
+        this.g.notify(`📦 Trascina "${itemName}" verso una mano o un oggetto nella scena.`);
       }, 380);
     }, { passive: true });
 
@@ -1679,6 +1680,28 @@ class Inventory {
               this.items[toSlot] = this.items[slotIdx];
               this.items[slotIdx] = tmp;
               this.render();
+            }
+          } else {
+            // ── Drop sul canvas 3D (iOS/Android): raycasting come il drop mouse ──
+            const cv = document.getElementById('cv');
+            const isOnCanvas = target === cv || cv.contains(target);
+            if (isOnCanvas && this.g && this.g.state === 'PLAY' && this.g.curScene && this.g.curScene.objs) {
+              const rect = cv.getBoundingClientRect();
+              const mx = ((touch.clientX - rect.left) / rect.width)  * 2 - 1;
+              const my = -((touch.clientY - rect.top)  / rect.height) * 2 + 1;
+              this.g.raycaster.setFromCamera({ x: mx, y: my }, this.g.camera);
+              const hits = this.g.raycaster.intersectObjects(this.g.curScene.objs.map(o => o.mesh), true);
+              if (hits.length > 0) {
+                const obj = this.g._getHitObj(hits[0].object);
+                if (obj && obj.onDrop) {
+                  this.g.player.move(obj.walkTarget.x, obj.walkTarget.z);
+                  this.g.pendingAction = { tgt: obj.walkTarget, fn: () => obj.onDrop(id) };
+                } else {
+                  this.g.notify('Non puoi usare ' + (GAME_DATA.items[id]?.name || 'questo') + ' qui.');
+                }
+              } else {
+                this.g.notify('Nessun oggetto qui vicino su cui usarlo.');
+              }
             }
           }
         }
