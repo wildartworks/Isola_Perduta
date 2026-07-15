@@ -29,6 +29,11 @@ class Player {
     // ── Lista NPC (THREE.Group) con raggio di collisione ──
     this.npcColliders = []; // { mesh: Group, radius: number }
 
+    // ── NavMesh 2D: poligono calpestabile ──
+    // Array di punti [x, z] che definisce la zona percorribile della scena corrente.
+    // Se null, il sistema NavMesh è disabilitato per quella scena.
+    this.walkablePolygon = null;
+
     // Fake ombra sotto il player
     const shadow = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.8), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0.3}));
     shadow.rotation.x = -Math.PI/2;
@@ -253,6 +258,8 @@ class Player {
     // ── Risolvi collisioni ──
     this._resolveStaticCollisions();
     this._resolveNPCCollisions();
+    // ── NavMesh: forza il player dentro la zona calpestabile ──
+    this._clampToWalkable();
 
     // Applica limiti se definiti da setBounds
     if (this.boundX !== undefined && this.boundZ !== undefined) {
@@ -264,6 +271,100 @@ class Player {
   setBounds(bx, bz) {
     this.boundX = bx;
     this.boundZ = bz;
+  }
+
+  // ── NavMesh 2D ──────────────────────────────────────────────────────────────
+
+  /**
+   * Imposta il poligono calpestabile per la scena corrente.
+   * @param {Array<[number,number]>} polygon  Array di coppie [x, z] in world-space.
+   *                                          null = disabilita il NavMesh.
+   */
+  setWalkableZone(polygon) {
+    this.walkablePolygon = polygon || null;
+  }
+
+  /**
+   * Ray-casting 2D: verifica se il punto (px, pz) è dentro il poligono.
+   * Algoritmo: conta quante volte un raggio verso +X interseca i lati del poligono.
+   * @param {number} px
+   * @param {number} pz
+   * @param {Array<[number,number]>} poly
+   * @returns {boolean}
+   */
+  _pointInPolygon(px, pz, poly) {
+    let inside = false;
+    const n = poly.length;
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const xi = poly[i][0], zi = poly[i][1];
+      const xj = poly[j][0], zj = poly[j][1];
+      const intersect = ((zi > pz) !== (zj > pz)) &&
+        (px < (xj - xi) * (pz - zi) / (zj - zi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  /**
+   * Trova il punto più vicino sul bordo del poligono rispetto a (px, pz).
+   * Itera su ogni segmento e calcola la proiezione sul segmento stesso.
+   * @param {number} px
+   * @param {number} pz
+   * @param {Array<[number,number]>} poly
+   * @returns {{ x: number, z: number }}
+   */
+  _nearestPointOnPolygon(px, pz, poly) {
+    let bestDist = Infinity;
+    let bestX = px, bestZ = pz;
+    const n = poly.length;
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const ax = poly[j][0], az = poly[j][1];
+      const bx = poly[i][0], bz = poly[i][1];
+      const abx = bx - ax, abz = bz - az;
+      const len2 = abx * abx + abz * abz;
+      if (len2 < 0.00001) continue;
+      // Parametro t clampato a [0, 1] — proiezione sul segmento
+      const t = Math.max(0, Math.min(1, ((px - ax) * abx + (pz - az) * abz) / len2));
+      const nx = ax + t * abx;
+      const nz = az + t * abz;
+      const dx = px - nx, dz = pz - nz;
+      const dist = dx * dx + dz * dz;
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestX = nx;
+        bestZ = nz;
+      }
+    }
+    return { x: bestX, z: bestZ };
+  }
+
+  /**
+   * Forza il player a rimanere dentro il poligono calpestabile.
+   * Se il player è uscito, lo riposiziona sul punto del bordo più vicino
+   * con un piccolo margine verso l'interno per evitare flickering.
+   */
+  _clampToWalkable() {
+    if (!this.walkablePolygon || this.walkablePolygon.length < 3) return;
+    const px = this.grp.position.x;
+    const pz = this.grp.position.z;
+    if (!this._pointInPolygon(px, pz, this.walkablePolygon)) {
+      const nearest = this._nearestPointOnPolygon(px, pz, this.walkablePolygon);
+      // Sposta leggermente verso il centro del nearest per evitare di stare
+      // esattamente sul bordo (causa flickering al frame successivo)
+      const cx = nearest.x;
+      const cz = nearest.z;
+      // Direzione dal nearest verso il player (per dare un piccolo margine inward)
+      const dx = px - cx, dz = pz - cz;
+      const len = Math.sqrt(dx * dx + dz * dz);
+      const margin = 0.05;
+      if (len > 0.001) {
+        this.grp.position.x = cx - (dx / len) * margin;
+        this.grp.position.z = cz - (dz / len) * margin;
+      } else {
+        this.grp.position.x = cx;
+        this.grp.position.z = cz;
+      }
+    }
   }
 
   findHandBone(parent) {

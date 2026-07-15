@@ -72,6 +72,20 @@ export class JungleScene {
     scene.add(this._floor);
     this.floorMesh = this._floor;
 
+    // ── NavMesh 2D: zona calpestabile della giungla ──
+    // Corridoio centrale tra gli alberi che si apre davanti (z > 0)
+    // e si restringe verso la grotta (z < 0).
+    player.setWalkableZone([
+      [-6.5,  3.5],  // davanti sinistra
+      [ 6.5,  3.5],  // davanti destra
+      [ 5.5,  0.5],  // centro-destra
+      [ 2.0, -2.5],  // strozzatura verso grotta destra
+      [ 1.5, -3.5],  // bordo grotta destra
+      [-1.5, -3.5],  // bordo grotta sinistra
+      [-2.0, -2.5],  // strozzatura verso grotta sinistra
+      [-5.5,  0.5],  // centro-sinistra
+    ]);
+
     player.setBounds(7, 3.5);
   }
 

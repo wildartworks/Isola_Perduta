@@ -79,6 +79,18 @@ export class BeachScene {
     scene.add(this._floor);
     this.floorMesh = this._floor;
 
+    // ── NavMesh 2D: zona calpestabile della spiaggia ──
+    // Esclude l'oceano (z < -3) e i bordi della scena.
+    // Poligono in senso antiorario visto dall'alto (piano XZ).
+    player.setWalkableZone([
+      [-7.5,  3.2],  // angolo posteriore sinistro
+      [ 7.5,  3.2],  // angolo posteriore destro
+      [ 7.5, -2.5],  // bordo destro (fronte mare)
+      [ 3.0, -3.0],  // curva della riva destra
+      [-3.0, -3.0],  // curva della riva sinistra
+      [-7.5, -2.5],  // bordo sinistro (fronte mare)
+    ]);
+
     player.setBounds(7.5, 3.2);
   }
 

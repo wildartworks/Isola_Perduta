@@ -83,6 +83,19 @@ export class TavernScene {
     scene.add(this._floor);
     this.floorMesh = this._floor;
 
+    // ── NavMesh 2D: zona calpestabile della taverna ──
+    // La taverna è un rettangolo interno.
+    // Il bancone (z = -3.2) è un ostacolo: il player non può andarci dietro.
+    // L'area davanti al bancone è percorribile fino a z = -2.2.
+    player.setWalkableZone([
+      [-7.0,  3.5],  // angolo posteriore sinistro
+      [ 7.0,  3.5],  // angolo posteriore destro
+      [ 7.0, -2.2],  // bordo destro (davanti al bancone)
+      [ 3.2, -2.2],  // bancone destra (arrotondamento angolo)
+      [-3.2, -2.2],  // bancone sinistra
+      [-7.0, -2.2],  // bordo sinistro
+    ]);
+
     player.setBounds(7, 3.5);
   }
 

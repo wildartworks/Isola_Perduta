@@ -2871,9 +2871,29 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
     p.staticColliders = [];
     p.npcColliders = [];
 
+    // ── Reset NavMesh: ogni cambio scena annulla il poligono precedente ──
+    p.setWalkableZone(null);
+
     if (this.curSceneId === 'porto') {
       // Edificio principale  cx=-5.5  cz=-2  halfW=1.7  halfD=1.45
       p.addStaticCollider(-5.5, -2,    1.7,  1.45);
+
+      // ── NavMesh 2D: pontile + banchina + area imbarcazioni ──
+      // Il player cammina sul pontile, sulla banchina sinistra e accanto alla barca.
+      // Tutto ciò che è fuori (l'acqua) è proibito.
+      p.setWalkableZone([
+        [-13.0,  4.5],  // fondo isola sinistra
+        [ -7.2,  4.5],
+        [ -7.2,  3.5],
+        [  6.5,  3.5],  // lato destro pontile fronte
+        [  6.5, -4.5],  // fine zattera/barca
+        [  3.0, -4.5],  // angolo barca destra
+        [  1.5,  1.0],  // rientro zona barca
+        [ -7.2,  1.0],  // bordo destro banchina
+        [ -7.2, -5.5],  // fondo banchina sinistra
+        [-13.0, -5.5],  // angolo isola bassa
+      ]);
+
     } else if (this.curSceneId === 'foresta') {
       // Orologio Maestro  cx=0  cz=10.2
       p.addStaticCollider(0, 10.2, 0.7, 0.7);
@@ -2883,12 +2903,39 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       if (this.curScene && !this.curScene.gateOpen) {
         this.curScene.gateCollider = p.addStaticCollider(0, 12.8, 1.8, 0.3);
       }
-      // Alberi foresta
+      // Alberi foresta (collider radiali)
       if (this.curScene && this.curScene.treePositions) {
         this.curScene.treePositions.forEach(t => {
           p.addStaticCollider(t.x, t.z, 0.3, 0.3);
         });
       }
+
+      // ── NavMesh 2D: radura circolare + sentiero verso orologio maestro ──
+      p.setWalkableZone([
+        [ 0.0, -2.0],
+        [ 3.5, -1.5],
+        [ 7.0,  0.0],
+        [ 8.5,  3.0],
+        [ 8.0,  7.0],
+        [ 5.5,  9.5],
+        [ 4.0, 11.0],
+        [ 3.0, 14.0],
+        [ 2.5, 18.0],  // oltre il cancello (se aperto)
+        [-2.5, 18.0],
+        [-3.0, 14.0],
+        [-4.0, 11.0],
+        [-5.5,  9.5],
+        [-8.0,  7.0],
+        [-8.5,  3.0],
+        [-7.0,  0.0],
+        [-3.5, -1.5],
+        // Riva della Nostalgia (corridoio sinistro)
+        [-9.0, -2.0],
+        [-9.0,  6.0],
+        [-6.0,  6.0],
+        [-6.0, -2.0],
+      ]);
+
     } else if (this.curSceneId === 'albergo') {
       // Banco Reception  cx=5  cz=-5
       p.addStaticCollider(5, -5, 1.6, 0.7);
@@ -2901,6 +2948,53 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       p.addStaticCollider(-8, 2, 0.3, 0.3);
       p.addStaticCollider(8, -4, 0.3, 0.3);
       p.addStaticCollider(8, 2, 0.3, 0.3);
+
+      // ── NavMesh 2D: hall dell'albergo ──
+      // Rettangolo interno, escluso il bancone posteriore e le colonne.
+      p.setWalkableZone([
+        [-14.0,  7.5],  // ingresso sinistra
+        [ 14.0,  7.5],  // ingresso destra
+        [ 14.0, -7.5],  // fondo destra (davanti al muro)
+        [  7.0, -7.5],
+        [  7.0, -4.5],  // esclusione colonna destra
+        [ -7.0, -4.5],
+        [ -7.0, -7.5],
+        [-14.0, -7.5],  // fondo sinistra
+      ]);
+
+    } else if (this.curSceneId === 'minera') {
+      // ── NavMesh 2D: tunnel a T con sala centrale ──
+      p.setWalkableZone([
+        [-8.0, -16.0],
+        [ 8.0, -16.0],
+        [ 8.0,  -8.0],
+        [12.0,  -8.0],  // braccio laterale destro
+        [12.0,   4.0],
+        [ 8.0,   4.0],
+        [ 8.0,  16.0],
+        [-8.0,  16.0],
+        [-8.0,   4.0],
+        [-12.0,  4.0],  // braccio laterale sinistro
+        [-12.0, -8.0],
+        [-8.0,  -8.0],
+      ]);
+
+    } else if (this.curSceneId === 'citta') {
+      // ── NavMesh 2D: piazzale centrale città sommersa ──
+      p.setWalkableZone([
+        [-12.0, -12.0],
+        [ 12.0, -12.0],
+        [ 12.0,  -6.0],
+        [ 14.0,  -6.0],
+        [ 14.0,   6.0],
+        [ 12.0,   6.0],
+        [ 12.0,  12.0],
+        [-12.0,  12.0],
+        [-12.0,   6.0],
+        [-14.0,   6.0],
+        [-14.0,  -6.0],
+        [-12.0,  -6.0],
+      ]);
     }
 
     // Registra tutti gli NPC dalla scena corrente

@@ -289,6 +289,7 @@ class Game {
   /**
    * Registra automaticamente i collider AABB di edifici/oggetti e gli NPC
    * dopo che la scena è stata costruita.
+   * Imposta anche il poligono NavMesh calpestabile per la scena corrente.
    */
   _registerSceneColliders() {
     if (!this.player) return;
@@ -296,33 +297,126 @@ class Game {
     p.staticColliders = [];
     p.npcColliders = [];
 
+    // ── Reset NavMesh: ogni cambio scena annulla il poligono precedente ──
+    p.setWalkableZone(null);
+
     if (this.curSceneId === 'porto') {
-      // ── Edificio principale ──  cx=-5.5  cz=-2  size 3×2.5
+      // ── Collider AABB ──
       p.addStaticCollider(-5.5, -2,   1.7, 1.45);
-      // ── Barca di Capitan Umber ──  cx=3  cz=-2  size 2.5×5
       p.addStaticCollider(3,    -2,   1.35, 2.6);
-      // ── Terreno isola sinistra ──  cx=-10  cz=-1  size 6×12
       p.addStaticCollider(-10,  -1,   3.2, 6.2);
-      // ── Banchina (piano legno) bordi laterali e testa ──
-      // La banchina è percorribile (y=0), ma blocca oltre i bordi X
-      // Bordo sinistro banchina (x~-7) 
       p.addStaticCollider(-7.5, -1,   0.3, 5.5);
-      // Bordo testa banchina (z~-5.5)
       p.addStaticCollider(-5,   -5.5, 2.5, 0.3);
+
+      // ── NavMesh 2D: pontile + banchina + area imbarcazioni ──
+      // Il player può camminare sul pontile principale (striscia centrale),
+      // sulla banchina sinistra (l'isola di terra), e accanto alla barca.
+      // L'acqua è tutto ciò che è fuori da questo poligono.
+      p.setWalkableZone([
+        // Banchina sinistra (isola di terra)
+        [-13.0,  4.5],
+        [ -7.2,  4.5],
+        // Angolo che scende verso il pontile
+        [ -7.2,  3.5],
+        [  6.5,  3.5],  // lato destro pontile fronte
+        [  6.5, -4.5],  // fine zattera/barca
+        [  3.0, -4.5],  // angolo barca destra
+        [  1.5,  1.0],  // rientro zona barca
+        [ -7.2,  1.0],  // bordo destro banchina
+        [ -7.2, -5.5],  // fondo banchina sinistra
+        [-13.0, -5.5],  // angolo isola bassa
+      ]);
+
     } else if (this.curSceneId === 'foresta') {
-      // ── Orologio Maestro ── cx=0 cz=10.2
+      // ── Collider AABB ──
       p.addStaticCollider(0, 10.2, 0.7, 0.7);
-      // ── Cancello di rovi (se chiuso) ── cx=0 cz=12.8
       if (this.curScene && !this.curScene.gateOpen) {
         this.curScene.gateCollider = p.addStaticCollider(0, 12.8, 1.8, 0.3);
       }
+
+      // ── NavMesh 2D: radura circolare + sentiero verso orologio maestro ──
+      // La foresta è una radura ampia. Gli alberi sono oltre raggio ~10.
+      // Sentiero centrale da z=-2 fino a z=18 (oltre il cancello).
+      p.setWalkableZone([
+        // Radura centrale (approssimazione circolo raggio 9 con 16 punti)
+        [ 0.0, -2.0],
+        [ 3.5, -1.5],
+        [ 7.0,  0.0],
+        [ 8.5,  3.0],
+        [ 8.0,  7.0],
+        [ 5.5,  9.5],
+        // Strozzatura verso il sentiero per l'orologio
+        [ 4.0, 11.0],
+        [ 3.0, 14.0],
+        [ 2.5, 18.0],  // oltre il cancello (se aperto)
+        [-2.5, 18.0],
+        [-3.0, 14.0],
+        [-4.0, 11.0],
+        [-5.5,  9.5],
+        [-8.0,  7.0],
+        [-8.5,  3.0],
+        [-7.0,  0.0],
+        [-3.5, -1.5],
+        // Riva della Nostalgia (sinistra, corridoio verso z negativo)
+        [-9.0, -2.0],
+        [-9.0,  6.0],
+        [-6.0,  6.0],
+        [-6.0, -2.0],
+      ]);
+
+    } else if (this.curSceneId === 'minera') {
+      // ── NavMesh 2D: tunnel a T con sala centrale ──
+      // Corridoio principale lungo Z con slarghi alle colonne.
+      p.setWalkableZone([
+        [-8.0, -16.0],  // fondo galleria sinistra
+        [ 8.0, -16.0],  // fondo galleria destra
+        [ 8.0,  -8.0],
+        [12.0,  -8.0],  // braccio laterale destro
+        [12.0,   4.0],
+        [ 8.0,   4.0],
+        [ 8.0,  16.0],  // fondo galleria avanzata
+        [-8.0,  16.0],
+        [-8.0,   4.0],
+        [-12.0,  4.0],  // braccio laterale sinistro
+        [-12.0, -8.0],
+        [-8.0,  -8.0],
+      ]);
+
+    } else if (this.curSceneId === 'citta') {
+      // ── NavMesh 2D: piazzale centrale città sommersa ──
+      // Area percorribile tra gli edifici. Escluse le zone degli edifici
+      // che sporgono verso il centro.
+      p.setWalkableZone([
+        [-12.0, -12.0],
+        [ 12.0, -12.0],
+        [ 12.0,  -6.0],
+        [ 14.0,  -6.0],  // slargo laterale destro
+        [ 14.0,   6.0],
+        [ 12.0,   6.0],
+        [ 12.0,  12.0],
+        [-12.0,  12.0],
+        [-12.0,   6.0],
+        [-14.0,   6.0],  // slargo laterale sinistro
+        [-14.0,  -6.0],
+        [-12.0,  -6.0],
+      ]);
+
     } else if (this.curSceneId === 'quest') {
-      // Confini per il livello Quest (limita i movimenti del player in una radura 11x11)
+      // Confini per il livello Quest (radura circolare di raggio ~10)
       p.setBounds(11, 11);
-      // Tavolo / Banco del Vecchio Saggio
+      // ── Collider AABB ──
       p.addStaticCollider(0, -4, 0.5, 0.5);
-      // Scrigno del tesoro
       p.addStaticCollider(0, 3, 0.45, 0.35);
+      // ── NavMesh 2D: radura erbosa circolare ──
+      // Gli alberi sono posizionati a raggio 12 — manteniamo il player
+      // entro un cerchio di raggio ~10 con poligono a 12 lati.
+      const R = 10.0;
+      const questPoly = [];
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        questPoly.push([Math.cos(angle) * R, Math.sin(angle) * R]);
+      }
+      p.setWalkableZone(questPoly);
     }
 
     // ── Registra NPC dalla scena corrente ──
