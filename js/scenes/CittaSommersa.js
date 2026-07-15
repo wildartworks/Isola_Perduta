@@ -72,6 +72,7 @@ class CittaSommersa {
     floor.rotation.x = -Math.PI / 2;
     floor.name = 'Pavimento Città Sommersa';
     scene.add(floor);
+    this.floorMesh = floor; // esposto per NavMesh click-to-walk
 
     // Crepe nel pavimento — strisce scure che lo solcano
     const crepaGeo = new THREE.BoxGeometry(0.08, 0.01, 12);

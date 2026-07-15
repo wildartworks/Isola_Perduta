@@ -40,6 +40,7 @@ class QuestScene {
     floor.rotation.x = -Math.PI / 2;
     floor.name = 'Terreno Quest';
     scene.add(floor);
+    this.floorMesh = floor; // esposto per NavMesh click-to-walk
 
     // Alberi decorativi intorno per delimitare l'area
     this._buildTrees(scene);

@@ -95,6 +95,7 @@ class MineraScene {
     floor.rotation.x = -Math.PI / 2;
     floor.name = 'Pavimento Miniera';
     scene.add(floor);
+    this.floorMesh = floor; // esposto per NavMesh click-to-walk
 
     // Soffitto basso (y=4)
     const ceilMat = new THREE.MeshLambertMaterial({ color: 0x111111 });

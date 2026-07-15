@@ -64,6 +64,7 @@ class ForestaScene {
     floor.rotation.x = -Math.PI / 2;
     floor.name = 'Terreno Foresta';
     scene.add(floor);
+    this.floorMesh = floor; // esposto per NavMesh click-to-walk
 
     // ── COSTRUZIONE ──
     this._buildForest(scene);

@@ -285,6 +285,32 @@ class Player {
   }
 
   /**
+   * Dato un punto (x, z), restituisce il punto più vicino dentro il poligono.
+   * Se il punto è già dentro (o non c'è NavMesh attiva), lo restituisce invariato.
+   * Usato per correggere walkTarget su tap/click mobile e desktop.
+   * @param {number} x
+   * @param {number} z
+   * @returns {{ x: number, z: number }}
+   */
+  clampPointToWalkable(x, z) {
+    if (!this.walkablePolygon || this.walkablePolygon.length < 3) {
+      return { x, z };
+    }
+    if (this._pointInPolygon(x, z, this.walkablePolygon)) {
+      return { x, z }; // già dentro: nessuna correzione
+    }
+    const nearest = this._nearestPointOnPolygon(x, z, this.walkablePolygon);
+    // Piccolo margine inward per non stare sul bordo
+    const dx = x - nearest.x, dz = z - nearest.z;
+    const len = Math.sqrt(dx * dx + dz * dz);
+    const margin = 0.1;
+    if (len > 0.001) {
+      return { x: nearest.x - (dx / len) * margin, z: nearest.z - (dz / len) * margin };
+    }
+    return { x: nearest.x, z: nearest.z };
+  }
+
+  /**
    * Ray-casting 2D: verifica se il punto (px, pz) è dentro il poligono.
    * Algoritmo: conta quante volte un raggio verso +X interseca i lati del poligono.
    * @param {number} px

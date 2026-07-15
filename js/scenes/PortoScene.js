@@ -65,6 +65,17 @@ class PortoScene {
     ponteHelper.name = 'Ponte_Walkable_Helper';
     scene.add(ponteHelper);
 
+    // Piano calpestabile invisibile — usato dal NavMesh per il click/tap sul pavimento
+    const floorHelper = new THREE.Mesh(
+      new THREE.PlaneGeometry(30, 20),
+      new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide })
+    );
+    floorHelper.rotation.x = -Math.PI / 2;
+    floorHelper.position.set(0, 0.01, 0);
+    floorHelper.name = 'Porto_Floor_NavMesh';
+    scene.add(floorHelper);
+    this.floorMesh = floorHelper; // esposto per NavMesh click-to-walk
+
     // Banchina sinistra
     const banchinaMat = new THREE.MeshLambertMaterial({ color: 0x2a1508 });
     const banchina = new THREE.Mesh(new THREE.BoxGeometry(4, 0.2, 10), banchinaMat);

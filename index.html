@@ -3074,6 +3074,13 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
             }
           }
 
+          // ── NavMesh: correggi il walkTarget se è fuori dalla zona calpestabile ──
+          // Questo garantisce il corretto funzionamento su mobile iOS/Android dove
+          // il tap può cadere in acqua, su rocce o fuori dai sentieri.
+          if (this.player && this.player.clampPointToWalkable) {
+            walkTarget = this.player.clampPointToWalkable(walkTarget.x, walkTarget.z);
+          }
+
           // Se già abbastanza vicino al target, azione immediata
           const ppx = this.player.grp.position.x;
           const ppz = this.player.grp.position.z;
@@ -3090,7 +3097,18 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
         }
       }
     }
-    // Rimossa la camminata sul pavimento tramite click
+
+    // ── Tap sul pavimento (senza oggetto) — valido su mobile e desktop ──
+    // Se il tap non ha colpito nessun oggetto interattivo, controlla se ha colpito
+    // il floorMesh della scena e muovi il player verso quel punto (clampato alla NavMesh).
+    if (this.curScene && this.curScene.floorMesh && this.player) {
+      const floorHits = this.raycaster.intersectObject(this.curScene.floorMesh, false);
+      if (floorHits.length > 0) {
+        const pt = floorHits[0].point;
+        const clamped = this.player.clampPointToWalkable(pt.x, pt.z);
+        this.player.move(clamped.x, clamped.z);
+      }
+    }
   }
 
   _getHitObj(hitObject) {
