@@ -2433,27 +2433,58 @@ class Game {
 
     const cv = document.getElementById('cv');
     const setMouse = (cx, cy) => {
-      const cw = window.innerWidth - (window.innerWidth > 768 ? 320 : 0);
-      this.mouse.x = (cx / cw)*2 - 1;
-      this.mouse.y = -(cy / window.innerHeight)*2 + 1;
+      const rect = cv.getBoundingClientRect();
+      this.mouse.x = ((cx - rect.left) / rect.width) * 2 - 1;
+      this.mouse.y = -((cy - rect.top) / rect.height) * 2 + 1;
     };
+    
+    let clickStartX = 0;
+    let clickStartY = 0;
     
     cv.addEventListener('mousemove', e => setMouse(e.clientX, e.clientY));
     cv.addEventListener('mousedown', (e) => { 
       this.isPressed = true; 
+      clickStartX = e.clientX;
+      clickStartY = e.clientY;
       setMouse(e.clientX, e.clientY);
-      this.onClick(); 
     });
-    window.addEventListener('mouseup', () => { this.isPressed = false; });
+    window.addEventListener('mouseup', (e) => { 
+      if (this.isPressed) {
+        this.isPressed = false;
+        // Esegui click/selezione solo se il mouse non è stato trascinato (es. durante rotazione camera)
+        const dist = Math.hypot(e.clientX - clickStartX, e.clientY - clickStartY);
+        if (dist < 6) {
+          setMouse(e.clientX, e.clientY);
+          this.onClick();
+        }
+      }
+    });
     
+    let touchStartX = 0;
+    let touchStartY = 0;
     cv.addEventListener('touchstart', e => {
       this.isPressed = true;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
       setMouse(e.touches[0].clientX, e.touches[0].clientY);
-      this.onClick();
     }, {passive:true});
-    window.addEventListener('touchend', () => { this.isPressed = false; });
+    window.addEventListener('touchend', e => {
+      if (this.isPressed) {
+        this.isPressed = false;
+        if (e.changedTouches && e.changedTouches.length > 0) {
+          const touch = e.changedTouches[0];
+          const dist = Math.hypot(touch.clientX - touchStartX, touch.clientY - touchStartY);
+          if (dist < 10) {
+            setMouse(touch.clientX, touch.clientY);
+            this.onClick();
+          }
+        }
+      }
+    });
     cv.addEventListener('touchmove', e => {
-      setMouse(e.touches[0].clientX, e.touches[0].clientY);
+      if (e.touches.length > 0) {
+        setMouse(e.touches[0].clientX, e.touches[0].clientY);
+      }
     }, {passive:true});
     
     cv.addEventListener('dragover', e => e.preventDefault());
