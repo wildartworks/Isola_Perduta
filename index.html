@@ -1884,6 +1884,11 @@ class Player {
     this.radius = 0.4;           // raggio capsule del player
     this.staticColliders = [];   // { minX, maxX, minZ, maxZ }
     this.npcColliders = [];      // { mesh, radius }
+
+    // ── NavMesh 2D: poligono calpestabile ──
+    // Array di punti [x, z] che definisce la zona percorribile della scena corrente.
+    // null = NavMesh disabilitato (nessun vincolo di zona).
+    this.walkablePolygon = null;
     
     // Fake ombra sotto il player
     const shadow = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.8), new THREE.MeshBasicMaterial({color:0x000000, transparent:true, opacity:0.3}));
@@ -2148,6 +2153,85 @@ class Player {
     console.log(`[Player] Arma "${itemId}" agganciata a bone "handR"`);
   }
 
+  // ── NavMesh 2D ──────────────────────────────────────────────────────────────
+
+  /** Imposta il poligono calpestabile della scena. null = disabilita NavMesh. */
+  setWalkableZone(polygon) {
+    this.walkablePolygon = polygon || null;
+  }
+
+  /**
+   * Restituisce il punto (x, z) corretto per stare dentro il poligono.
+   * Se è già dentro (o NavMesh disabilitato), lo restituisce invariato.
+   * Usato per clampare walkTarget su tap/click mobile (iOS/Android) e desktop.
+   */
+  clampPointToWalkable(x, z) {
+    if (!this.walkablePolygon || this.walkablePolygon.length < 3) return { x, z };
+    if (this._pointInPolygon(x, z, this.walkablePolygon)) return { x, z };
+    const nearest = this._nearestPointOnPolygon(x, z, this.walkablePolygon);
+    const dx = x - nearest.x, dz = z - nearest.z;
+    const len = Math.sqrt(dx * dx + dz * dz);
+    if (len > 0.001) return { x: nearest.x - (dx / len) * 0.1, z: nearest.z - (dz / len) * 0.1 };
+    return { x: nearest.x, z: nearest.z };
+  }
+
+  /**
+   * Ray-casting 2D: true se (px, pz) è dentro il poligono.
+   * Conta le intersezioni di un raggio verso +X con i lati del poligono.
+   */
+  _pointInPolygon(px, pz, poly) {
+    let inside = false;
+    const n = poly.length;
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const xi = poly[i][0], zi = poly[i][1];
+      const xj = poly[j][0], zj = poly[j][1];
+      if (((zi > pz) !== (zj > pz)) && (px < (xj - xi) * (pz - zi) / (zj - zi) + xi)) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  }
+
+  /** Trova il punto più vicino sul bordo del poligono a (px, pz). */
+  _nearestPointOnPolygon(px, pz, poly) {
+    let bestDist = Infinity, bestX = px, bestZ = pz;
+    const n = poly.length;
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const ax = poly[j][0], az = poly[j][1];
+      const bx = poly[i][0], bz = poly[i][1];
+      const abx = bx - ax, abz = bz - az;
+      const len2 = abx * abx + abz * abz;
+      if (len2 < 0.00001) continue;
+      const t = Math.max(0, Math.min(1, ((px - ax) * abx + (pz - az) * abz) / len2));
+      const nx = ax + t * abx, nz = az + t * abz;
+      const d = (px - nx) * (px - nx) + (pz - nz) * (pz - nz);
+      if (d < bestDist) { bestDist = d; bestX = nx; bestZ = nz; }
+    }
+    return { x: bestX, z: bestZ };
+  }
+
+  /**
+   * Forza il player dentro il poligono calpestabile ogni frame.
+   * Chiamato in update() dopo _resolveStaticCollisions e _resolveNPCCollisions.
+   */
+  _clampToWalkable() {
+    if (!this.walkablePolygon || this.walkablePolygon.length < 3) return;
+    const px = this.grp.position.x;
+    const pz = this.grp.position.z;
+    if (!this._pointInPolygon(px, pz, this.walkablePolygon)) {
+      const nearest = this._nearestPointOnPolygon(px, pz, this.walkablePolygon);
+      const dx = px - nearest.x, dz = pz - nearest.z;
+      const len = Math.sqrt(dx * dx + dz * dz);
+      if (len > 0.001) {
+        this.grp.position.x = nearest.x - (dx / len) * 0.05;
+        this.grp.position.z = nearest.z - (dz / len) * 0.05;
+      } else {
+        this.grp.position.x = nearest.x;
+        this.grp.position.z = nearest.z;
+      }
+    }
+  }
+
   move(x, z) {
     this.target.set(x, 0, z);
     this.moving = true;
@@ -2231,6 +2315,8 @@ class Player {
     // Risolvi collisioni dopo ogni spostamento
     this._resolveStaticCollisions();
     this._resolveNPCCollisions();
+    // ── NavMesh: forza il player dentro la zona calpestabile ──
+    this._clampToWalkable();
 
     // Allineamento altezza al terreno (salita scalini e dislivelli) ed evitare cadute in mare
     if (this.scene) {
