@@ -2451,35 +2451,14 @@ class Game {
     window.addEventListener('mouseup', (e) => { 
       if (this.isPressed) {
         this.isPressed = false;
-        // Esegui click/selezione solo se il mouse non è stato trascinato (es. durante rotazione camera)
+        // Esegui click/selezione solo se il mouse non è stato trascinato significativamente (tolleranza 15px)
         const dist = Math.hypot(e.clientX - clickStartX, e.clientY - clickStartY);
-        if (dist < 6) {
+        if (dist < 15) {
           setMouse(e.clientX, e.clientY);
           this.onClick();
         }
       }
     });
-
-    // Intercettatori in fase di cattura (capture: true) per la modalità EDIT
-    // Questo cattura il click PRIMA che OrbitControls lo consumi o muova la telecamera
-    cv.addEventListener('pointerdown', (e) => {
-      if (this.state === 'EDIT') {
-        clickStartX = e.clientX;
-        clickStartY = e.clientY;
-      }
-    }, true);
-
-    cv.addEventListener('pointerup', (e) => {
-      if (this.state === 'EDIT') {
-        const dist = Math.hypot(e.clientX - clickStartX, e.clientY - clickStartY);
-        if (dist < 6) {
-          // Ferma la propagazione così OrbitControls non muove la telecamera
-          e.stopPropagation();
-          setMouse(e.clientX, e.clientY);
-          this.onClick();
-        }
-      }
-    }, true);
     
     let touchStartX = 0;
     let touchStartY = 0;
@@ -3715,17 +3694,35 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       if (this.state === 'EDIT' && e.ctrlKey && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         if (this._undoStack && this._undoStack.length > 0) {
-          const name = obj.name || obj.type;
-
-          // Reinserisce l'oggetto nel parent originale
-          parent.add(obj);
-
-          // Riaggiorna la lista e riseleziona l'oggetto ripristinato
-          this.refreshObjList();
-          this.selectObject(obj, obj.userData.editorLi);
-          this.notify(`↩️ Ripristinato: "${name}" — ancora ${this._undoStack.length} undo disponibili`);
+          const action = this._undoStack.pop();
+          
+          if (action.type === 'delete') {
+            const obj = action.obj;
+            const parent = action.parent || this.scene;
+            
+            // Reinserisce l'oggetto nel parent originale
+            parent.add(obj);
+            
+            // Riaggiorna la lista e riseleziona l'oggetto ripristinato
+            this.refreshObjList();
+            this.selectObject(obj, obj.userData.editorLi);
+            this.notify(`↩️ Annullata eliminazione di: "${obj.name || obj.type}"`);
+          } else if (action.type === 'transform') {
+            const obj = action.obj;
+            
+            // Ripristina posizione, rotazione e scala precedenti
+            obj.position.copy(action.position);
+            obj.rotation.copy(action.rotation);
+            obj.scale.copy(action.scale);
+            
+            this.updatePropUI();
+            if (this.edBoxHelper) {
+              this.edBoxHelper.update();
+            }
+            this.notify(`↩️ Annullato spostamento/rotazione di: "${obj.name || obj.type}"`);
+          }
         } else {
-          this.notify('⚠️ Nessun oggetto da ripristinare (stack undo vuota).');
+          this.notify('⚠️ Nessuna azione da annullare (stack undo vuoto).');
         }
       }
     });
