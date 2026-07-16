@@ -3107,22 +3107,49 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
         }
         return false;
       });
-      if (clickedGizmo) return;
-
+      if (clickedGizmo) return; // Se clicca sul gizmo TransformControls, non fa nulla (seleziona già il trascinamento)
+      
+      let foundValid = false;
       for (let hit of hits) {
         let obj = hit.object;
         let target = obj;
+        
+        // Risali fino ad essere un figlio diretto della scena
         while (target.parent && target.parent !== this.scene) {
-          if (target.userData && target.userData.editorLi) {
-            break;
-          }
           target = target.parent;
         }
-        if (target === this.edControls || (target.parent && target.parent === this.edControls)) continue;
-
+        
+        const name = (target.name || "").toLowerCase();
+        
+        // Escludi oggetti speciali e ambientali che non ha senso spostare o selezionare
+        if (
+          target === this.edControls ||
+          (target.parent && target.parent === this.edControls) ||
+          target === this.edBoxHelper ||
+          (this.player && (target === this.player.grp || target.uuid === this.player.grp.uuid)) ||
+          name.includes('terreno') ||
+          name.includes('pavimento') ||
+          name.includes('floor') ||
+          name.includes('acqua') ||
+          name.includes('sea') ||
+          name.includes('water') ||
+          name.includes('cielo') ||
+          name.includes('sky') ||
+          name.includes('grid') ||
+          name.includes('helper')
+        ) {
+          continue;
+        }
+        
         this.selectObject(target, target.userData.editorLi);
         this.notify(`Selezionato: ${target.name || target.type}`);
-        return;
+        foundValid = true;
+        break;
+      }
+      
+      // Se clicca sul vuoto o sul terreno, deseleziona l'oggetto attivo
+      if (!foundValid) {
+        this.selectObject(null, null);
       }
       return;
     }
@@ -3604,6 +3631,10 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
           // Stacca i gizmo e deseleziona
           this.edControls.detach();
           this.edSelected = null;
+          if (this.edBoxHelper) {
+            this.scene.remove(this.edBoxHelper);
+            this.edBoxHelper = null;
+          }
 
           // Rimuovi dalla scena
           parent.remove(obj);
@@ -3831,6 +3862,10 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       ui.classList.add('hidden');
       this.scene.remove(this.edControls);
       this.edControls.detach();
+      if (this.edBoxHelper) {
+        this.scene.remove(this.edBoxHelper);
+        this.edBoxHelper = null;
+      }
       if (this.orbitControls) {
         this.orbitControls.enabled = false;
       }
@@ -3930,9 +3965,34 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
 
   selectObject(obj, li) {
     document.querySelectorAll('#editor-obj-list li').forEach(l => l.classList.remove('selected'));
+    
+    // Fallback: se non è passato l'elemento li, cerchiamo nella lista dell'editor
+    if (!li && obj) {
+      const allLis = document.querySelectorAll('#editor-obj-list li');
+      for (let l of allLis) {
+        if (l.textContent.includes(obj.name) || l.textContent.includes(obj.type)) {
+          li = l;
+          break;
+        }
+      }
+    }
+    
     if(li) li.classList.add('selected');
     this.edSelected = obj;
-    this.edControls.attach(obj);
+    
+    // Gestione BoxHelper di selezione (contorno rosso)
+    if (this.edBoxHelper) {
+      this.scene.remove(this.edBoxHelper);
+      this.edBoxHelper = null;
+    }
+    
+    if (obj) {
+      this.edControls.attach(obj);
+      this.edBoxHelper = new THREE.BoxHelper(obj, 0xff0000);
+      this.scene.add(this.edBoxHelper);
+    } else {
+      this.edControls.detach();
+    }
     
     const propTitle = document.getElementById('editor-prop-title');
     if (propTitle) {
@@ -4232,6 +4292,9 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
 
   loop() {
     requestAnimationFrame(() => this.loop());
+    if (this.state === 'EDIT' && this.edBoxHelper) {
+      this.edBoxHelper.update();
+    }
     const dt = Math.min(0.1, this.clock.getDelta());
     if(this.state === 'PLAY' || this.state === 'DIALOG' || this.state === 'EDIT') {
       if(this.player && this.state === 'PLAY') {
