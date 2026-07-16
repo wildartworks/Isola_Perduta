@@ -2459,6 +2459,27 @@ class Game {
         }
       }
     });
+
+    // Intercettatori in fase di cattura (capture: true) per la modalità EDIT
+    // Questo cattura il click PRIMA che OrbitControls lo consumi o muova la telecamera
+    cv.addEventListener('pointerdown', (e) => {
+      if (this.state === 'EDIT') {
+        clickStartX = e.clientX;
+        clickStartY = e.clientY;
+      }
+    }, true);
+
+    cv.addEventListener('pointerup', (e) => {
+      if (this.state === 'EDIT') {
+        const dist = Math.hypot(e.clientX - clickStartX, e.clientY - clickStartY);
+        if (dist < 6) {
+          // Ferma la propagazione così OrbitControls non muove la telecamera
+          e.stopPropagation();
+          setMouse(e.clientX, e.clientY);
+          this.onClick();
+        }
+      }
+    }, true);
     
     let touchStartX = 0;
     let touchStartY = 0;
@@ -3143,16 +3164,28 @@ Le correnti hanno distrutto la tua zattera sulla costa del Porto delle Maree Mor
       let foundValid = false;
       for (let hit of hits) {
         let obj = hit.object;
-        let target = obj;
         
-        // Risali fino ad essere un figlio diretto della scena
+        // 1. Ignora elementi invisibili (come gli helper di collisione e navmesh)
+        let isVisible = true;
+        let temp = obj;
+        while (temp) {
+          if (temp.visible === false || (temp.material && temp.material.visible === false)) {
+            isVisible = false;
+            break;
+          }
+          temp = temp.parent;
+        }
+        if (!isVisible) continue;
+        
+        // 2. Risali fino ad essere un figlio diretto della scena
+        let target = obj;
         while (target.parent && target.parent !== this.scene) {
           target = target.parent;
         }
         
         const name = (target.name || "").toLowerCase();
         
-        // Escludi oggetti speciali e ambientali che non ha senso spostare o selezionare
+        // 3. Escludi oggetti speciali e ambientali che non ha senso spostare o selezionare
         if (
           target === this.edControls ||
           (target.parent && target.parent === this.edControls) ||
