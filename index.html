@@ -727,6 +727,89 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
     #editor-left  { display: none; } /* su schermi piccoli solo prop destra + barra touch */
     #editor-right { width: 100%; max-width: 220px; }
   }
+
+  /* ── Stile responsive per la pergamena bruciata dell'intro ── */
+  .scroll-paper {
+    position: relative;
+    width: min(90vw, 90vh, 640px);
+    aspect-ratio: 1/1;
+    background: url('assets/pergamena_bruciata.webp?v=2') no-repeat center center;
+    background-size: 100% 100%;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+    padding: 5.5rem 5.2rem 4.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #000000;
+    box-sizing: border-box;
+    text-align: center;
+    justify-content: space-between;
+  }
+  .scroll-paper h2 {
+    font-family: var(--ft);
+    font-size: 2.1rem;
+    color: #000000;
+    margin-bottom: 0.5rem;
+    text-shadow: none;
+    border-bottom: 2px dashed rgba(0, 0, 0, 0.4);
+    padding-bottom: 0.4rem;
+    width: 100%;
+  }
+  .scroll-paper p {
+    font-family: var(--fb);
+    font-size: 1.12rem;
+    line-height: 1.65;
+    text-align: center;
+    color: #000000;
+    font-style: italic;
+    white-space: pre-wrap;
+    font-weight: bold;
+    margin: auto 0;
+    width: 100%;
+  }
+  .scroll-paper button.btn {
+    font-size: 1.15rem;
+    padding: 0.7em 2.2em;
+  }
+
+  @media (max-width: 768px) {
+    .scroll-paper {
+      padding: 4.2rem 3.8rem 3.2rem;
+    }
+    .scroll-paper h2 {
+      font-size: 1.55rem;
+      margin-bottom: 0.3rem;
+      padding-bottom: 0.2rem;
+    }
+    .scroll-paper p {
+      font-size: 0.95rem;
+      line-height: 1.42;
+    }
+    .scroll-paper button.btn {
+      font-size: 0.95rem;
+      padding: 0.6em 1.8em;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .scroll-paper {
+      padding: 2.8rem 2.5rem 2.2rem;
+    }
+    .scroll-paper h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.2rem;
+      padding-bottom: 0.1rem;
+    }
+    .scroll-paper p {
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+    .scroll-paper button.btn {
+      font-size: 0.85rem;
+      padding: 0.5em 1.5em;
+    }
+  }
 </style>
 </head>
 <body>
@@ -926,20 +1009,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var
 
   <!-- INTRO INTRODUTTIVA STORIA (foglio pergamena con Title.png come sfondo) -->
   <div id="intro-screen" class="hidden" style="position:fixed; inset:0; z-index:190; display:flex; align-items:center; justify-content:center; background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('assets/Title.webp?v=2') no-repeat center center; background-size: cover; padding: 20px;">
-    <div style="position:relative; width:min(90vw, 90vh, 640px); aspect-ratio: 1/1; background: url('assets/pergamena_bruciata.webp?v=2') no-repeat center center; background-size: 100% 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.85); padding: 5.5rem 5.2rem 4.5rem; display:flex; flex-direction:column; align-items:center; color: #000000; box-sizing: border-box; text-align:center; justify-content:space-between;">
+    <div class="scroll-paper">
       
       <!-- Titolo statico in alto -->
       <div style="width: 100%;">
-        <h2 style="font-family: var(--ft); font-size: 2.1rem; color: #000000; margin-bottom: 0.5rem; text-shadow: none; border-bottom: 2px dashed rgba(0, 0, 0, 0.4); padding-bottom: 0.4rem; width: 100%;">ISOLA SENZA NOME</h2>
+        <h2>ISOLA SENZA NOME</h2>
       </div>
       
       <!-- Area testo scorrevole interna (il testo rimane sempre dentro la pergamena) -->
       <div style="width: 100%; flex: 1; overflow-y: auto; padding-right: 8px; margin-top: 0.5rem; margin-bottom: 0.8rem; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-        <p id="intro-text" style="font-family: var(--fb); font-size: 1.12rem; line-height: 1.65; text-align: center; color: #000000; font-style: italic; white-space: pre-wrap; font-weight: bold; margin: auto 0; width: 100%;"></p>
+        <p id="intro-text"></p>
       </div>
       
       <!-- Pulsante statico in basso -->
-      <button class="btn" onclick="confirmStartGame()" style="font-size:1.15rem; padding:.7em 2.2em; background:linear-gradient(135deg, #482a10, #693e18); border:2px solid #321c0b; color:#ebdcb9; box-shadow: 0 4px 15px rgba(72, 42, 16, 0.4), 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.2s; cursor:pointer;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+      <button class="btn" onclick="confirmStartGame()" style="background:linear-gradient(135deg, #482a10, #693e18); border:2px solid #321c0b; color:#ebdcb9; box-shadow: 0 4px 15px rgba(72, 42, 16, 0.4), 0 2px 5px rgba(0,0,0,0.3); transition: transform 0.2s; cursor:pointer;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
         PARTI ORA →
       </button>
     </div>
